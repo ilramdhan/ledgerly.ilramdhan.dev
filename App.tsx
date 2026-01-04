@@ -9,6 +9,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { LandingPage } from './pages/LandingPage';
 import { PageRoute } from './types';
 import { Menu, X, Plus } from 'lucide-react';
 import { cn } from './utils';
@@ -21,6 +22,9 @@ const AppContent: React.FC = () => {
   const [activeRoute, setActiveRoute] = useState<PageRoute>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showAddTxnMobile, setShowAddTxnMobile] = useState(false);
+  
+  // Auth Flow States
+  const [showLanding, setShowLanding] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
   
   // Theme State with persistence
@@ -45,11 +49,37 @@ const AppContent: React.FC = () => {
     setIsDark(!isDark);
   };
 
-  // Auth Flow
+  // Auth Flow Handling
   if (!isAuthenticated) {
+    if (showLanding) {
+      return (
+        <LandingPage 
+          onLogin={() => {
+            setIsRegistering(false);
+            setShowLanding(false);
+          }}
+          onGetStarted={() => {
+            setIsRegistering(true);
+            setShowLanding(false);
+          }}
+        />
+      );
+    }
+
     return (
         <div className="min-h-screen bg-[#F7F9FB] dark:bg-[#0F1724]">
              {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+             
+             {/* Back Button to Landing (Optional UX improvement) */}
+             <div className="absolute top-4 left-4 z-10">
+                <button 
+                  onClick={() => setShowLanding(true)} 
+                  className="text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                >
+                  ← Back to Home
+                </button>
+             </div>
+
              {isRegistering ? (
                  <RegisterPage onSwitch={() => setIsRegistering(false)} />
              ) : (
