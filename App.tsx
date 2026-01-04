@@ -10,6 +10,9 @@ import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LandingPage } from './pages/LandingPage';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { PricingPage, RoadmapPage, AboutPage, BlogPage, ContactPage } from './pages/PublicPages';
 import { PageRoute } from './types';
 import { Menu, X, Plus } from 'lucide-react';
 import { cn } from './utils';
@@ -17,15 +20,17 @@ import { DataProvider, useData } from './contexts/DataContext';
 import { Toast } from './components/ui/Toast';
 import { AddTransactionModal } from './components/modals/AddTransactionModal';
 
+// Types for public routes
+type PublicRoute = 'landing' | 'login' | 'register' | 'privacy' | 'tos' | 'pricing' | 'roadmap' | 'about' | 'blog' | 'contact';
+
 const AppContent: React.FC = () => {
   const { isAuthenticated, toast, hideToast } = useData();
   const [activeRoute, setActiveRoute] = useState<PageRoute>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showAddTxnMobile, setShowAddTxnMobile] = useState(false);
   
-  // Auth Flow States
-  const [showLanding, setShowLanding] = useState(true);
-  const [isRegistering, setIsRegistering] = useState(false);
+  // Public Route State
+  const [publicRoute, setPublicRoute] = useState<PublicRoute>('landing');
   
   // Theme State with persistence
   const [isDark, setIsDark] = useState(() => {
@@ -49,19 +54,30 @@ const AppContent: React.FC = () => {
     setIsDark(!isDark);
   };
 
-  // Auth Flow Handling
+  // Auth / Public Flow Handling
   if (!isAuthenticated) {
-    if (showLanding) {
+    // Info Pages
+    if (publicRoute === 'privacy') return <PrivacyPolicy onBack={() => setPublicRoute('landing')} />;
+    if (publicRoute === 'tos') return <TermsOfService onBack={() => setPublicRoute('landing')} />;
+    if (publicRoute === 'pricing') return <PricingPage onBack={() => setPublicRoute('landing')} onGetStarted={() => setPublicRoute('register')} />;
+    if (publicRoute === 'roadmap') return <RoadmapPage onBack={() => setPublicRoute('landing')} />;
+    if (publicRoute === 'about') return <AboutPage onBack={() => setPublicRoute('landing')} />;
+    if (publicRoute === 'blog') return <BlogPage onBack={() => setPublicRoute('landing')} />;
+    if (publicRoute === 'contact') return <ContactPage onBack={() => setPublicRoute('landing')} />;
+    
+    // Default Landing Logic
+    if (publicRoute === 'landing') {
       return (
         <LandingPage 
-          onLogin={() => {
-            setIsRegistering(false);
-            setShowLanding(false);
-          }}
-          onGetStarted={() => {
-            setIsRegistering(true);
-            setShowLanding(false);
-          }}
+          onLogin={() => setPublicRoute('login')}
+          onGetStarted={() => setPublicRoute('register')}
+          onViewPrivacy={() => setPublicRoute('privacy')}
+          onViewToS={() => setPublicRoute('tos')}
+          onViewPricing={() => setPublicRoute('pricing')}
+          onViewRoadmap={() => setPublicRoute('roadmap')}
+          onViewAbout={() => setPublicRoute('about')}
+          onViewBlog={() => setPublicRoute('blog')}
+          onViewContact={() => setPublicRoute('contact')}
         />
       );
     }
@@ -70,26 +86,26 @@ const AppContent: React.FC = () => {
         <div className="min-h-screen bg-[#F7F9FB] dark:bg-[#0F1724]">
              {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
              
-             {/* Back Button to Landing (Optional UX improvement) */}
+             {/* Back Button to Landing */}
              <div className="absolute top-4 left-4 z-10">
                 <button 
-                  onClick={() => setShowLanding(true)} 
+                  onClick={() => setPublicRoute('landing')} 
                   className="text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
                 >
                   ← Back to Home
                 </button>
              </div>
 
-             {isRegistering ? (
-                 <RegisterPage onSwitch={() => setIsRegistering(false)} />
+             {publicRoute === 'register' ? (
+                 <RegisterPage onSwitch={() => setPublicRoute('login')} />
              ) : (
-                 <LoginPage onSwitch={() => setIsRegistering(true)} />
+                 <LoginPage onSwitch={() => setPublicRoute('register')} />
              )}
         </div>
     )
   }
 
-  // Main App Flow
+  // Main App Flow (Authenticated)
   const renderContent = () => {
     switch(activeRoute) {
       case 'dashboard': return <Dashboard onNavigate={setActiveRoute} />;
