@@ -32,6 +32,7 @@ export interface Transaction {
   status: 'pending' | 'posted';
   type: TransactionType;
   isRecurring?: boolean;
+  recurringPeriod?: 'monthly' | 'yearly';
 }
 
 export interface Budget {

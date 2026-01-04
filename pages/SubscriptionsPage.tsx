@@ -12,18 +12,40 @@ export const SubscriptionsPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [subToEdit, setSubToEdit] = useState<Transaction | null>(null);
 
-  // Filter for recurring transactions only
+  // Filter for recurring transactions only (and Expenses only, for safety)
   const subscriptions = useMemo(() => {
-    return transactions.filter(t => t.isRecurring)
+    return transactions
+      .filter(t => t.isRecurring && t.type === 'expense')
       .sort((a, b) => b.date.localeCompare(a.date)); // Newest first
   }, [transactions]);
 
-  const totalMonthly = subscriptions.reduce((sum, sub) => sum + Math.abs(sub.amount), 0);
+  // Calculate Monthly Cost equivalent
+  const totalMonthly = subscriptions.reduce((sum, sub) => {
+    const amount = Math.abs(sub.amount);
+    if (sub.recurringPeriod === 'yearly') {
+        return sum + (amount / 12);
+    }
+    return sum + amount;
+  }, 0);
 
-  function getNextMonthDate(dateStr: string) {
+  function getNextPaymentDate(dateStr: string, period: 'monthly' | 'yearly' = 'monthly') {
     const date = new Date(dateStr);
-    date.setMonth(date.getMonth() + 1);
-    return date.toISOString().split('T')[0];
+    const today = new Date();
+    
+    // Simple logic: Project forward until date is in future
+    // In a real app, this is more complex. Here we just show the next cycle.
+    // If the original date is in the past, just add 1 cycle relative to original date to keep it simple,
+    // OR ideally project it to the next upcoming date relative to TODAY.
+    
+    let nextDate = new Date(date);
+    while (nextDate <= today) {
+        if (period === 'yearly') {
+            nextDate.setFullYear(nextDate.getFullYear() + 1);
+        } else {
+            nextDate.setMonth(nextDate.getMonth() + 1);
+        }
+    }
+    return nextDate.toISOString().split('T')[0];
   }
 
   function getIcon(merchant: string, category: string) {
@@ -67,59 +89,62 @@ export const SubscriptionsPage: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-3">
-              {subscriptions.map((sub) => (
-                <div key={sub.id} className="group relative flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm border border-slate-100 dark:border-slate-600">
-                      {getIcon(sub.merchant, sub.category)}
+              {subscriptions.map((sub) => {
+                  const period = sub.recurringPeriod || 'monthly';
+                  return (
+                    <div key={sub.id} className="group relative flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm border border-slate-100 dark:border-slate-600">
+                        {getIcon(sub.merchant, sub.category)}
+                        </div>
+                        <div>
+                        <h4 className="font-medium text-slate-900 dark:text-white">{sub.merchant}</h4>
+                        <div className="text-xs text-slate-500 flex items-center gap-1 capitalize">
+                            <span className={period === 'yearly' ? 'text-primary-600 font-medium' : ''}>{period}</span>
+                            <span>•</span>
+                            <span>Last: {formatDate(sub.date)}</span>
+                        </div>
+                        </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-slate-900 dark:text-white">{sub.merchant}</h4>
-                      <div className="text-xs text-slate-500 flex items-center gap-1">
-                        <span>Monthly</span>
-                        <span>•</span>
-                        <span>Last paid: {formatDate(sub.date)}</span>
-                      </div>
+                    <div className="text-right">
+                        <span className="block font-bold text-slate-900 dark:text-white tabular-nums">
+                        {formatCurrency(Math.abs(sub.amount))}
+                        </span>
+                        <div className="text-xs text-slate-400">Next: {formatDate(getNextPaymentDate(sub.date, period))}</div>
                     </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="block font-bold text-slate-900 dark:text-white tabular-nums">
-                      {formatCurrency(Math.abs(sub.amount))}
-                    </span>
-                    <div className="text-xs text-slate-400">Next: {formatDate(getNextMonthDate(sub.date))}</div>
-                  </div>
-                  
-                  {/* Actions */}
-                  <div className="absolute top-1/2 -translate-y-1/2 right-3 flex gap-2 opacity-0 group-hover:opacity-100 bg-white dark:bg-slate-800 p-1 rounded-md shadow-md border border-slate-200 dark:border-slate-600 transition-all">
-                     <button 
-                       onClick={() => handleEdit(sub)}
-                       className="p-1.5 text-slate-400 hover:text-primary-500 rounded-md"
-                       title="Edit"
-                     >
-                       <Pencil size={14} />
-                     </button>
-                     <button 
-                       onClick={() => {
-                         if(confirm('Stop tracking this subscription? This will delete the transaction record.')) deleteTransaction(sub.id);
-                       }}
-                       className="p-1.5 text-slate-400 hover:text-red-500 rounded-md"
-                       title="Delete"
-                     >
-                       <Trash2 size={14} />
-                     </button>
-                  </div>
-                </div>
-              ))}
+                    
+                    {/* Actions */}
+                    <div className="absolute top-1/2 -translate-y-1/2 right-3 flex gap-2 opacity-0 group-hover:opacity-100 bg-white dark:bg-slate-800 p-1 rounded-md shadow-md border border-slate-200 dark:border-slate-600 transition-all">
+                        <button 
+                        onClick={() => handleEdit(sub)}
+                        className="p-1.5 text-slate-400 hover:text-primary-500 rounded-md"
+                        title="Edit"
+                        >
+                        <Pencil size={14} />
+                        </button>
+                        <button 
+                        onClick={() => {
+                            if(confirm('Stop tracking this subscription? This will delete the transaction record.')) deleteTransaction(sub.id);
+                        }}
+                        className="p-1.5 text-slate-400 hover:text-red-500 rounded-md"
+                        title="Delete"
+                        >
+                        <Trash2 size={14} />
+                        </button>
+                    </div>
+                    </div>
+                  );
+              })}
             </div>
           )}
         </Card>
 
         <div className="space-y-6">
           <Card className="bg-primary-600 text-white border-none">
-            <h3 className="text-primary-100 text-sm font-medium mb-1">Total Monthly Cost</h3>
+            <h3 className="text-primary-100 text-sm font-medium mb-1">Total Monthly Impact</h3>
             <div className="text-3xl font-bold mb-4">{formatCurrency(totalMonthly)}</div>
             <p className="text-sm text-primary-100 opacity-90">
-              You are spending about <strong>{formatCurrency(totalMonthly * 12)}</strong> per year on subscriptions.
+              Estimated annual cost: <strong>{formatCurrency(totalMonthly * 12)}</strong>
             </p>
           </Card>
 
@@ -130,7 +155,9 @@ export const SubscriptionsPage: React.FC = () => {
                 {subscriptions.slice(0, 3).map((sub, i) => (
                     <div key={i} className="flex justify-between items-center text-sm">
                     <span className="text-slate-600 dark:text-slate-400 truncate max-w-[120px]">{sub.merchant}</span>
-                    <span className="font-medium text-slate-900 dark:text-white tabular-nums">{formatDate(getNextMonthDate(sub.date))}</span>
+                    <span className="font-medium text-slate-900 dark:text-white tabular-nums">
+                        {formatDate(getNextPaymentDate(sub.date, sub.recurringPeriod || 'monthly'))}
+                    </span>
                     </div>
                 ))}
                 </div>

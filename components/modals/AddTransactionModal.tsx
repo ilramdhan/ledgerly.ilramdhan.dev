@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, RefreshCw } from 'lucide-react';
+import { X, RefreshCw, Calendar, CalendarClock } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useData } from '../../contexts/DataContext';
@@ -22,7 +22,8 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
     accountId: '',
     date: new Date().toISOString().split('T')[0],
     type: 'expense' as TransactionType,
-    isRecurring: false
+    isRecurring: false,
+    recurringPeriod: 'monthly' as 'monthly' | 'yearly'
   });
 
   // Load defaults
@@ -40,7 +41,8 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
                 accountId: transactionToEdit.accountId,
                 date: transactionToEdit.date,
                 type: transactionToEdit.type,
-                isRecurring: transactionToEdit.isRecurring || false
+                isRecurring: transactionToEdit.isRecurring || false,
+                recurringPeriod: transactionToEdit.recurringPeriod || 'monthly'
             });
         } else if (initialData) {
             setFormData(prev => ({
@@ -51,7 +53,8 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
                 category: prev.category || defaultCat,
                 accountId: prev.accountId || defaultAcc,
                 type: (initialData.amount && initialData.amount > 0) ? 'income' : 'expense',
-                isRecurring: initialData.isRecurring || defaultRecurring
+                isRecurring: initialData.isRecurring || defaultRecurring,
+                recurringPeriod: 'monthly'
             }));
         } else {
             setFormData({
@@ -61,11 +64,19 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
                 accountId: defaultAcc,
                 date: new Date().toISOString().split('T')[0],
                 type: 'expense',
-                isRecurring: defaultRecurring
+                isRecurring: defaultRecurring,
+                recurringPeriod: 'monthly'
             });
         }
     }
   }, [isOpen, initialData, transactionToEdit, accounts, categories, defaultRecurring]);
+
+  // If type changes to income/transfer, force recurring to false
+  useEffect(() => {
+    if (formData.type !== 'expense' && formData.isRecurring) {
+        setFormData(prev => ({ ...prev, isRecurring: false }));
+    }
+  }, [formData.type]);
 
   if (!isOpen) return null;
 
@@ -84,7 +95,8 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
         accountId: formData.accountId,
         currency: 'USD',
         type: formData.type,
-        isRecurring: formData.isRecurring
+        isRecurring: formData.type === 'expense' ? formData.isRecurring : false,
+        recurringPeriod: formData.type === 'expense' && formData.isRecurring ? formData.recurringPeriod : undefined
     };
 
     if (transactionToEdit) {
@@ -99,7 +111,7 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
 
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
-      {/* Backdrop Layer - explicitly 0 margin/padding */}
+      {/* Backdrop Layer */}
       <div 
         className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-sm m-0 p-0" 
         onClick={onClose}
@@ -191,12 +203,47 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
               </select>
             </div>
 
-            <div className="flex items-center gap-2 pt-1 cursor-pointer" onClick={() => setFormData(p => ({...p, isRecurring: !p.isRecurring}))}>
-               <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.isRecurring ? 'bg-primary-500 border-primary-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
-                 {formData.isRecurring && <RefreshCw size={12} />}
-               </div>
-               <span className="text-sm text-slate-700 dark:text-slate-300 select-none">Mark as Monthly Subscription</span>
-            </div>
+            {/* Recurring Settings - Only for Expenses */}
+            {formData.type === 'expense' && (
+                <div className="border-t border-slate-100 dark:border-slate-700 pt-3">
+                    <div 
+                        className="flex items-center gap-2 cursor-pointer mb-3" 
+                        onClick={() => setFormData(p => ({...p, isRecurring: !p.isRecurring}))}
+                    >
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.isRecurring ? 'bg-primary-500 border-primary-500 text-white' : 'border-slate-300 dark:border-slate-600'}`}>
+                            {formData.isRecurring && <RefreshCw size={12} />}
+                        </div>
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300 select-none">Mark as Subscription</span>
+                    </div>
+
+                    {formData.isRecurring && (
+                        <div className="grid grid-cols-2 gap-2 animate-in fade-in slide-in-from-top-2">
+                             <button
+                                type="button"
+                                onClick={() => setFormData(p => ({...p, recurringPeriod: 'monthly'}))}
+                                className={`flex items-center justify-center gap-2 p-2 rounded-lg border text-sm transition-all ${
+                                    formData.recurringPeriod === 'monthly'
+                                    ? 'bg-primary-50 border-primary-200 text-primary-700 dark:bg-primary-900/20 dark:border-primary-800 dark:text-primary-300 ring-1 ring-primary-500'
+                                    : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400'
+                                }`}
+                             >
+                                <Calendar size={14} /> Monthly
+                             </button>
+                             <button
+                                type="button"
+                                onClick={() => setFormData(p => ({...p, recurringPeriod: 'yearly'}))}
+                                className={`flex items-center justify-center gap-2 p-2 rounded-lg border text-sm transition-all ${
+                                    formData.recurringPeriod === 'yearly'
+                                    ? 'bg-primary-50 border-primary-200 text-primary-700 dark:bg-primary-900/20 dark:border-primary-800 dark:text-primary-300 ring-1 ring-primary-500'
+                                    : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400'
+                                }`}
+                             >
+                                <CalendarClock size={14} /> Yearly
+                             </button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="pt-2">
               <Button className="w-full" type="submit">
