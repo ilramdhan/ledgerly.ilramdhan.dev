@@ -7,6 +7,8 @@ import { GoalsPage } from './pages/GoalsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { PageRoute } from './types';
 import { Menu, X, Plus } from 'lucide-react';
 import { cn } from './utils';
@@ -15,9 +17,11 @@ import { Toast } from './components/ui/Toast';
 import { AddTransactionModal } from './components/modals/AddTransactionModal';
 
 const AppContent: React.FC = () => {
+  const { isAuthenticated, toast, hideToast } = useData();
   const [activeRoute, setActiveRoute] = useState<PageRoute>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showAddTxnMobile, setShowAddTxnMobile] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   
   // Theme State with persistence
   const [isDark, setIsDark] = useState(() => {
@@ -25,8 +29,6 @@ const AppContent: React.FC = () => {
     if (saved) return saved === 'dark';
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
-  
-  const { toast, hideToast } = useData();
 
   // Apply theme side-effect
   useEffect(() => {
@@ -43,6 +45,21 @@ const AppContent: React.FC = () => {
     setIsDark(!isDark);
   };
 
+  // Auth Flow
+  if (!isAuthenticated) {
+    return (
+        <div className="min-h-screen bg-[#F7F9FB] dark:bg-[#0F1724]">
+             {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
+             {isRegistering ? (
+                 <RegisterPage onSwitch={() => setIsRegistering(false)} />
+             ) : (
+                 <LoginPage onSwitch={() => setIsRegistering(true)} />
+             )}
+        </div>
+    )
+  }
+
+  // Main App Flow
   const renderContent = () => {
     switch(activeRoute) {
       case 'dashboard': return <Dashboard onNavigate={setActiveRoute} />;

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../utils';
 import { PageRoute } from '../../types';
+import { useData } from '../../contexts/DataContext';
 
 interface SidebarProps {
   activeRoute: PageRoute;
@@ -22,6 +23,8 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, onNavigate, isDark, onToggleTheme }) => {
+  const { logout } = useData();
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: CreditCard },
@@ -72,7 +75,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, onNavigate, isDar
           {isDark ? <Sun size={18} /> : <Moon size={18} />}
           {isDark ? 'Light Mode' : 'Dark Mode'}
         </button>
-        <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10">
+        <button 
+            onClick={logout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10"
+        >
           <LogOut size={18} />
           Sign Out
         </button>

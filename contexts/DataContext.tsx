@@ -16,6 +16,10 @@ interface DataContextType {
   categories: string[];
   metrics: Metric[];
   toast: ToastData | null;
+  isAuthenticated: boolean;
+  login: (email: string) => Promise<void>;
+  register: (name: string, email: string) => Promise<void>;
+  logout: () => void;
   addTransaction: (txn: Omit<Transaction, 'id' | 'status'>) => void;
   editTransaction: (id: string, updates: Partial<Transaction>) => void;
   addAccount: (acc: Omit<Account, 'id' | 'lastSynced'>) => void;
@@ -39,6 +43,11 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return !!localStorage.getItem('ledgerly_token');
+  });
+
   // Persistence Loading
   const [user, setUser] = useState<User>(() => {
     const saved = localStorage.getItem('ledgerly_user');
@@ -124,6 +133,46 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const hideToast = () => setToast(null);
+
+  // Auth Methods
+  const login = async (email: string) => {
+    // Simulate API call
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        // Mock token generation
+        localStorage.setItem('ledgerly_token', 'mock_jwt_token_' + Date.now());
+        setIsAuthenticated(true);
+        // Ensure user email matches
+        setUser(prev => ({ ...prev, email }));
+        showToast(`Welcome back, ${user.name}!`, 'success');
+        resolve();
+      }, 1000);
+    });
+  };
+
+  const register = async (name: string, email: string) => {
+    return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          localStorage.setItem('ledgerly_token', 'mock_jwt_token_' + Date.now());
+          setIsAuthenticated(true);
+          setUser({
+            id: 'u-' + Date.now(),
+            name,
+            email,
+            currency: 'USD',
+            avatarUrl: `https://ui-avatars.com/api/?name=${name}`
+          });
+          showToast(`Account created! Welcome, ${name}.`, 'success');
+          resolve();
+        }, 1000);
+      });
+  }
+
+  const logout = () => {
+    localStorage.removeItem('ledgerly_token');
+    setIsAuthenticated(false);
+    showToast('You have been logged out.', 'success');
+  };
 
   const addTransaction = (txnData: Omit<Transaction, 'id' | 'status'>) => {
     const newTxn: Transaction = {
@@ -280,7 +329,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const resetData = () => {
     if (confirm("Are you sure? This will reset all data to default demo data.")) {
-      localStorage.clear();
+      localStorage.removeItem('ledgerly_user');
+      localStorage.removeItem('ledgerly_accounts');
+      localStorage.removeItem('ledgerly_transactions');
+      localStorage.removeItem('ledgerly_budgets');
+      localStorage.removeItem('ledgerly_goals');
+      localStorage.removeItem('ledgerly_categories');
+      // Keep token to stay logged in
       window.location.reload();
     }
   };
@@ -295,6 +350,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       categories,
       metrics,
       toast,
+      isAuthenticated,
+      login,
+      register,
+      logout,
       addTransaction,
       editTransaction,
       addAccount,
