@@ -62,73 +62,79 @@ export const LinkAccountModal: React.FC<Props> = ({ isOpen, onClose, accountToEd
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <Card className="w-full max-w-md relative shadow-2xl">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-          <X size={20} />
-        </button>
-        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
-          {accountToEdit ? 'Edit Account' : 'Link Account'}
-        </h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Account Name</label>
-            <input 
-              required
-              type="text" 
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="e.g. Chase Checking"
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
-            />
-          </div>
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
+      <div 
+        className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-sm m-0 p-0" 
+        onClick={onClose}
+      />
+      <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <Card className="w-full max-w-md relative shadow-2xl text-left">
+          <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+            <X size={20} />
+          </button>
+          <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
+            {accountToEdit ? 'Edit Account' : 'Link Account'}
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Account Name</label>
+              <input 
+                required
+                type="text" 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                placeholder="e.g. Chase Checking"
+                value={formData.name}
+                onChange={e => setFormData({...formData, name: e.target.value})}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Account Type</label>
-            <select 
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              value={formData.type}
-              onChange={e => setFormData({...formData, type: e.target.value as AccountType})}
-            >
-              <option value="bank">Bank</option>
-              <option value="credit">Credit Card</option>
-              <option value="cash">Cash / Wallet</option>
-              <option value="investment">Investment</option>
-            </select>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Account Type</label>
+              <select 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                value={formData.type}
+                onChange={e => setFormData({...formData, type: e.target.value as AccountType})}
+              >
+                <option value="bank">Bank</option>
+                <option value="credit">Credit Card</option>
+                <option value="cash">Cash / Wallet</option>
+                <option value="investment">Investment</option>
+              </select>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Current Balance</label>
-            <input 
-              required
-              type="number" 
-              step="0.01"
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="0.00"
-              value={formData.balance}
-              onChange={e => setFormData({...formData, balance: e.target.value})}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Current Balance</label>
+              <input 
+                required
+                type="number" 
+                step="0.01"
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                placeholder="0.00"
+                value={formData.balance}
+                onChange={e => setFormData({...formData, balance: e.target.value})}
+              />
+            </div>
 
-          <div>
-             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Institution Name (Optional)</label>
-             <input 
-              type="text" 
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="e.g. Bank of America"
-              value={formData.institution}
-              onChange={e => setFormData({...formData, institution: e.target.value})}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Institution Name (Optional)</label>
+              <input 
+                type="text" 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                placeholder="e.g. Bank of America"
+                value={formData.institution}
+                onChange={e => setFormData({...formData, institution: e.target.value})}
+              />
+            </div>
 
-          <div className="pt-2">
-            <Button className="w-full" type="submit">
-              {accountToEdit ? 'Save Changes' : 'Create Account'}
-            </Button>
-          </div>
-        </form>
-      </Card>
+            <div className="pt-2">
+              <Button className="w-full" type="submit">
+                {accountToEdit ? 'Save Changes' : 'Create Account'}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 };

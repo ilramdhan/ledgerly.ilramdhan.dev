@@ -54,59 +54,65 @@ export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose, budgetToEd
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <Card className="w-full max-w-md relative shadow-2xl">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-          <X size={20} />
-        </button>
-        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
-          {budgetToEdit ? 'Edit Budget' : 'New Budget'}
-        </h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
-            <select 
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              value={formData.category}
-              onChange={e => setFormData({...formData, category: e.target.value})}
-            >
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
+      <div 
+        className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-sm m-0 p-0" 
+        onClick={onClose}
+      />
+      <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <Card className="w-full max-w-md relative shadow-2xl text-left">
+          <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+            <X size={20} />
+          </button>
+          <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
+            {budgetToEdit ? 'Edit Budget' : 'New Budget'}
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
+              <select 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                value={formData.category}
+                onChange={e => setFormData({...formData, category: e.target.value})}
+              >
+                {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Spending Limit</label>
-            <input 
-              required
-              type="number" 
-              step="1"
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="e.g. 500"
-              value={formData.limit}
-              onChange={e => setFormData({...formData, limit: e.target.value})}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Spending Limit</label>
+              <input 
+                required
+                type="number" 
+                step="1"
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                placeholder="e.g. 500"
+                value={formData.limit}
+                onChange={e => setFormData({...formData, limit: e.target.value})}
+              />
+            </div>
 
-          <div>
-             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Period</label>
-             <select 
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              value={formData.period}
-              onChange={e => setFormData({...formData, period: e.target.value as any})}
-            >
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Period</label>
+              <select 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                value={formData.period}
+                onChange={e => setFormData({...formData, period: e.target.value as any})}
+              >
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
 
-          <div className="pt-2">
-            <Button className="w-full" type="submit">
-              {budgetToEdit ? 'Save Changes' : 'Set Budget'}
-            </Button>
-          </div>
-        </form>
-      </Card>
+            <div className="pt-2">
+              <Button className="w-full" type="submit">
+                {budgetToEdit ? 'Save Changes' : 'Set Budget'}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 };

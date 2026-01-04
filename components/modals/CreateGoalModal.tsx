@@ -57,73 +57,79 @@ export const CreateGoalModal: React.FC<Props> = ({ isOpen, onClose, goalToEdit }
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <Card className="w-full max-w-md relative shadow-2xl">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-          <X size={20} />
-        </button>
-        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
-          {goalToEdit ? 'Edit Savings Goal' : 'New Savings Goal'}
-        </h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Goal Name</label>
-            <input 
-              required
-              type="text" 
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="e.g. New Car, Bali Trip"
-              value={formData.name}
-              onChange={e => setFormData({...formData, name: e.target.value})}
-            />
-          </div>
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
+      <div 
+        className="fixed inset-0 w-full h-full bg-black/60 backdrop-blur-sm m-0 p-0" 
+        onClick={onClose}
+      />
+      <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <Card className="w-full max-w-md relative shadow-2xl text-left">
+          <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+            <X size={20} />
+          </button>
+          <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
+            {goalToEdit ? 'Edit Savings Goal' : 'New Savings Goal'}
+          </h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Goal Name</label>
+              <input 
+                required
+                type="text" 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                placeholder="e.g. New Car, Bali Trip"
+                value={formData.name}
+                onChange={e => setFormData({...formData, name: e.target.value})}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Amount</label>
-            <input 
-              required
-              type="number" 
-              step="1"
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              placeholder="e.g. 5000"
-              value={formData.targetAmount}
-              onChange={e => setFormData({...formData, targetAmount: e.target.value})}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Amount</label>
+              <input 
+                required
+                type="number" 
+                step="1"
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                placeholder="e.g. 5000"
+                value={formData.targetAmount}
+                onChange={e => setFormData({...formData, targetAmount: e.target.value})}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Date (Optional)</label>
-            <input 
-              type="date" 
-              className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
-              value={formData.deadline}
-              onChange={e => setFormData({...formData, deadline: e.target.value})}
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Date (Optional)</label>
+              <input 
+                type="date" 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                value={formData.deadline}
+                onChange={e => setFormData({...formData, deadline: e.target.value})}
+              />
+            </div>
 
-          <div>
-             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Color Tag</label>
-             <div className="flex gap-2">
-               {COLORS.map(c => (
-                 <button
-                   key={c}
-                   type="button"
-                   onClick={() => setFormData({...formData, color: c})}
-                   className={`w-8 h-8 rounded-full border-2 transition-all ${formData.color === c ? 'border-slate-500 scale-110' : 'border-transparent'}`}
-                   style={{ backgroundColor: c }}
-                 />
-               ))}
-             </div>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Color Tag</label>
+              <div className="flex gap-2">
+                {COLORS.map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setFormData({...formData, color: c})}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${formData.color === c ? 'border-slate-500 scale-110' : 'border-transparent'}`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
 
-          <div className="pt-2">
-            <Button className="w-full" type="submit">
-              {goalToEdit ? 'Save Changes' : 'Create Goal'}
-            </Button>
-          </div>
-        </form>
-      </Card>
+            <div className="pt-2">
+              <Button className="w-full" type="submit">
+                {goalToEdit ? 'Save Changes' : 'Create Goal'}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 };
