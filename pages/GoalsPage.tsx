@@ -3,7 +3,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useData } from '../contexts/DataContext';
 import { formatCurrency, formatDate, cn } from '../utils';
-import { Plus, Target, Trash2, Calendar, Trophy } from 'lucide-react';
+import { Plus, Target, Trash2, Calendar, Trophy, Pencil } from 'lucide-react';
 import { CreateGoalModal } from '../components/modals/CreateGoalModal';
 import { AddMoneyModal } from '../components/modals/AddMoneyModal';
 import { Goal } from '../types';
@@ -11,7 +11,18 @@ import { Goal } from '../types';
 export const GoalsPage: React.FC = () => {
   const { goals, deleteGoal } = useData();
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null); // For Adding Money
+  const [goalToEdit, setGoalToEdit] = useState<Goal | null>(null); // For Editing
+
+  const handleEdit = (goal: Goal) => {
+    setGoalToEdit(goal);
+    setShowCreateModal(true);
+  };
+
+  const handleCloseCreate = () => {
+    setShowCreateModal(false);
+    setGoalToEdit(null);
+  };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -40,13 +51,22 @@ export const GoalsPage: React.FC = () => {
 
             return (
               <Card key={goal.id} className="relative group flex flex-col h-full" padding="lg">
-                <button 
-                  onClick={() => deleteGoal(goal.id)}
-                  className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Delete Goal"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <button 
+                    onClick={() => handleEdit(goal)}
+                    className="p-1.5 text-slate-300 hover:text-primary-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    title="Edit Goal"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button 
+                    onClick={() => deleteGoal(goal.id)}
+                    className="p-1.5 text-slate-300 hover:text-red-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    title="Delete Goal"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
 
                 <div className="flex items-center gap-4 mb-6">
                   <div 
@@ -108,7 +128,11 @@ export const GoalsPage: React.FC = () => {
         </div>
       )}
       
-      <CreateGoalModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
+      <CreateGoalModal 
+        isOpen={showCreateModal} 
+        onClose={handleCloseCreate} 
+        goalToEdit={goalToEdit}
+      />
       <AddMoneyModal isOpen={!!selectedGoal} onClose={() => setSelectedGoal(null)} goal={selectedGoal} />
     </div>
   );

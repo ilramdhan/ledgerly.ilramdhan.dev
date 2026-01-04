@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useData } from '../../contexts/DataContext';
+import { Goal } from '../../types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  goalToEdit?: Goal | null;
 }
 
 const COLORS = ['#3FB77F', '#5B86E5', '#F6C85F', '#EF6B6B', '#8EA6FF'];
 
-export const CreateGoalModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const { addGoal } = useData();
+export const CreateGoalModal: React.FC<Props> = ({ isOpen, onClose, goalToEdit }) => {
+  const { addGoal, editGoal } = useData();
   const [formData, setFormData] = useState({
     name: '',
     targetAmount: '',
@@ -20,18 +22,38 @@ export const CreateGoalModal: React.FC<Props> = ({ isOpen, onClose }) => {
     color: COLORS[0]
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (goalToEdit) {
+        setFormData({
+          name: goalToEdit.name,
+          targetAmount: goalToEdit.targetAmount.toString(),
+          deadline: goalToEdit.deadline || '',
+          color: goalToEdit.color
+        });
+      } else {
+        setFormData({ name: '', targetAmount: '', deadline: '', color: COLORS[0] });
+      }
+    }
+  }, [isOpen, goalToEdit]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addGoal({
+    const data = {
       name: formData.name,
       targetAmount: parseFloat(formData.targetAmount) || 0,
       deadline: formData.deadline || undefined,
       color: formData.color
-    });
+    };
+
+    if (goalToEdit) {
+      editGoal(goalToEdit.id, data);
+    } else {
+      addGoal(data);
+    }
     onClose();
-    setFormData({ name: '', targetAmount: '', deadline: '', color: COLORS[0] });
   };
 
   return (
@@ -40,7 +62,9 @@ export const CreateGoalModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
           <X size={20} />
         </button>
-        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">New Savings Goal</h2>
+        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
+          {goalToEdit ? 'Edit Savings Goal' : 'New Savings Goal'}
+        </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -94,7 +118,9 @@ export const CreateGoalModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="pt-2">
-            <Button className="w-full" type="submit">Create Goal</Button>
+            <Button className="w-full" type="submit">
+              {goalToEdit ? 'Save Changes' : 'Create Goal'}
+            </Button>
           </div>
         </form>
       </Card>

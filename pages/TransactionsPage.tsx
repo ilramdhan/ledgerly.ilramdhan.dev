@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { TransactionList } from '../components/data/TransactionList';
-import { Search, Filter, Download, Plus } from 'lucide-react';
+import { Search, Filter, Download, Plus, Calendar } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { AddTransactionModal } from '../components/modals/AddTransactionModal';
 import { exportToCSV } from '../utils';
@@ -12,6 +12,7 @@ export const TransactionsPage: React.FC = () => {
   const { transactions } = useData();
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [showAddModal, setShowAddModal] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
 
@@ -20,9 +21,12 @@ export const TransactionsPage: React.FC = () => {
       const matchesSearch = t.merchant.toLowerCase().includes(search.toLowerCase()) || 
                             t.category.toLowerCase().includes(search.toLowerCase());
       const matchesType = filterType === 'all' || t.type === filterType;
-      return matchesSearch && matchesType;
+      const matchesDate = (!dateRange.from || t.date >= dateRange.from) && 
+                          (!dateRange.to || t.date <= dateRange.to);
+      
+      return matchesSearch && matchesType && matchesDate;
     });
-  }, [search, filterType, transactions]);
+  }, [search, filterType, dateRange, transactions]);
 
   const handleExport = () => {
     exportToCSV(filteredData, `ledgerly_transactions_${new Date().toISOString().split('T')[0]}.csv`);
@@ -60,7 +64,7 @@ export const TransactionsPage: React.FC = () => {
       </div>
 
       <Card className="flex-shrink-0" padding="sm">
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col lg:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
@@ -71,21 +75,40 @@ export const TransactionsPage: React.FC = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
-            {['all', 'expense', 'income', 'transfer'].map(type => (
-              <button
-                key={type}
-                onClick={() => setFilterType(type)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium capitalize whitespace-nowrap transition-colors ${
-                  filterType === type 
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' 
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-750'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-            <Button variant="secondary" className="px-3"><Filter size={18} /></Button>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+               <Calendar size={16} className="text-slate-400 ml-2" />
+               <input 
+                 type="date" 
+                 className="bg-transparent text-sm border-none focus:ring-0 text-slate-600 dark:text-slate-300 w-32"
+                 value={dateRange.from}
+                 onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
+               />
+               <span className="text-slate-400">-</span>
+               <input 
+                 type="date" 
+                 className="bg-transparent text-sm border-none focus:ring-0 text-slate-600 dark:text-slate-300 w-32"
+                 value={dateRange.to}
+                 onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
+               />
+            </div>
+
+            <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
+              {['all', 'expense', 'income', 'transfer'].map(type => (
+                <button
+                  key={type}
+                  onClick={() => setFilterType(type)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium capitalize whitespace-nowrap transition-colors ${
+                    filterType === type 
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' 
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-750'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </Card>

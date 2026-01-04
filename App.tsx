@@ -15,26 +15,34 @@ import { Toast } from './components/ui/Toast';
 const AppContent: React.FC = () => {
   const [activeRoute, setActiveRoute] = useState<PageRoute>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  
+  // Theme State with persistence
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('ledgerly_theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   
   const { toast, hideToast } = useData();
 
-  // Initialize theme based on system pref
+  // Apply theme side-effect
   useEffect(() => {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDark(true);
+    if (isDark) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('ledgerly_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('ledgerly_theme', 'light');
     }
-  }, []);
+  }, [isDark]);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
   };
 
   const renderContent = () => {
     switch(activeRoute) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard onNavigate={setActiveRoute} />;
       case 'transactions': return <TransactionsPage />;
       case 'budgets': return <BudgetsPage />;
       case 'goals': return <GoalsPage />;

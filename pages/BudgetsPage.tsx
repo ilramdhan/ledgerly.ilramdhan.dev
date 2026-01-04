@@ -3,12 +3,14 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useData } from '../contexts/DataContext';
 import { formatCurrency, cn } from '../utils';
-import { PieChart, Plus, Trash2 } from 'lucide-react';
+import { PieChart, Plus, Trash2, Pencil } from 'lucide-react';
 import { CreateBudgetModal } from '../components/modals/CreateBudgetModal';
+import { Budget } from '../types';
 
 export const BudgetsPage: React.FC = () => {
   const { budgets, transactions, deleteBudget } = useData();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
 
   // Calculate actual spend based on real transactions for each budget category
   const enrichedBudgets = budgets.map(b => {
@@ -18,6 +20,16 @@ export const BudgetsPage: React.FC = () => {
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     return { ...b, spent };
   });
+
+  const handleEdit = (budget: Budget) => {
+    setBudgetToEdit(budget);
+    setShowCreateModal(true);
+  };
+
+  const handleClose = () => {
+    setShowCreateModal(false);
+    setBudgetToEdit(null);
+  };
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -45,13 +57,22 @@ export const BudgetsPage: React.FC = () => {
 
             return (
               <Card key={budget.id} className="space-y-4 group relative">
-                <button 
-                  onClick={() => deleteBudget(budget.id)}
-                  className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Delete Budget"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <button 
+                    onClick={() => handleEdit(budget)}
+                    className="p-1.5 text-slate-300 hover:text-primary-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    title="Edit Budget"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                  <button 
+                    onClick={() => deleteBudget(budget.id)}
+                    className="p-1.5 text-slate-300 hover:text-red-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    title="Delete Budget"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
 
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
@@ -63,7 +84,7 @@ export const BudgetsPage: React.FC = () => {
                       <p className="text-xs text-slate-500 uppercase tracking-wide">{budget.period}</p>
                     </div>
                   </div>
-                  <div className="text-right mr-6 md:mr-0">
+                  <div className="text-right mr-10 md:mr-10">
                     <span className={cn(
                       "font-bold block tabular-nums",
                       isOver ? "text-red-500" : "text-slate-900 dark:text-white"
@@ -97,7 +118,11 @@ export const BudgetsPage: React.FC = () => {
         </div>
       )}
       
-      <CreateBudgetModal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)} />
+      <CreateBudgetModal 
+        isOpen={showCreateModal} 
+        onClose={handleClose} 
+        budgetToEdit={budgetToEdit}
+      />
     </div>
   );
 };

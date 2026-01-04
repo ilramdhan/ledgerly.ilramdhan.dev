@@ -18,9 +18,12 @@ interface DataContextType {
   addTransaction: (txn: Omit<Transaction, 'id' | 'status'>) => void;
   editTransaction: (id: string, updates: Partial<Transaction>) => void;
   addAccount: (acc: Omit<Account, 'id' | 'lastSynced'>) => void;
+  editAccount: (id: string, updates: Partial<Account>) => void;
   deleteAccount: (id: string) => void;
   addBudget: (budget: Omit<Budget, 'id' | 'spent'>) => void;
+  editBudget: (id: string, updates: Partial<Budget>) => void;
   addGoal: (goal: Omit<Goal, 'id' | 'currentAmount'>) => void;
+  editGoal: (id: string, updates: Partial<Goal>) => void;
   updateGoal: (id: string, currentAmount: number) => void;
   deleteTransaction: (id: string) => void;
   deleteBudget: (id: string) => void;
@@ -182,6 +185,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     showToast('Account linked successfully', 'success');
   };
 
+  const editAccount = (id: string, updates: Partial<Account>) => {
+    setAccounts(prev => prev.map(a => {
+      if (a.id === id) return { ...a, ...updates };
+      return a;
+    }));
+    showToast('Account details updated', 'success');
+  };
+
   const deleteAccount = (id: string) => {
     setAccounts(prev => prev.filter(a => a.id !== id));
     showToast('Account removed', 'success');
@@ -197,6 +208,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     showToast('Budget created', 'success');
   };
 
+  const editBudget = (id: string, updates: Partial<Budget>) => {
+    setBudgets(prev => prev.map(b => {
+      if (b.id === id) return { ...b, ...updates };
+      return b;
+    }));
+    showToast('Budget updated', 'success');
+  };
+
   const deleteBudget = (id: string) => {
     setBudgets(prev => prev.filter(b => b.id !== id));
     showToast('Budget removed', 'success');
@@ -210,6 +229,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
     setGoals(prev => [...prev, newGoal]);
     showToast('Financial goal set!', 'success');
+  };
+
+  const editGoal = (id: string, updates: Partial<Goal>) => {
+    setGoals(prev => prev.map(g => {
+      if (g.id === id) return { ...g, ...updates };
+      return g;
+    }));
+    showToast('Goal details updated', 'success');
   };
 
   const updateGoal = (id: string, amount: number) => {
@@ -249,9 +276,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       addTransaction,
       editTransaction,
       addAccount,
+      editAccount,
       deleteAccount,
       addBudget,
+      editBudget,
       addGoal,
+      editGoal,
       updateGoal,
       deleteTransaction,
       deleteBudget,

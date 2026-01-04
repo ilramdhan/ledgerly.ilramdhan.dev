@@ -1,34 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useData } from '../../contexts/DataContext';
 import { CATEGORIES } from '../../constants';
+import { Budget } from '../../types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  budgetToEdit?: Budget | null;
 }
 
-export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const { addBudget } = useData();
+export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose, budgetToEdit }) => {
+  const { addBudget, editBudget } = useData();
   const [formData, setFormData] = useState({
     category: CATEGORIES[0],
     limit: '',
     period: 'monthly' as 'monthly' | 'yearly'
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (budgetToEdit) {
+        setFormData({
+          category: budgetToEdit.category,
+          limit: budgetToEdit.limit.toString(),
+          period: budgetToEdit.period
+        });
+      } else {
+        setFormData({ category: CATEGORIES[0], limit: '', period: 'monthly' });
+      }
+    }
+  }, [isOpen, budgetToEdit]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addBudget({
-      category: formData.category,
-      limit: parseFloat(formData.limit) || 0,
-      period: formData.period
-    });
+    if (budgetToEdit) {
+      editBudget(budgetToEdit.id, {
+        category: formData.category,
+        limit: parseFloat(formData.limit) || 0,
+        period: formData.period
+      });
+    } else {
+      addBudget({
+        category: formData.category,
+        limit: parseFloat(formData.limit) || 0,
+        period: formData.period
+      });
+    }
     onClose();
-    setFormData({ category: CATEGORIES[0], limit: '', period: 'monthly' });
   };
 
   return (
@@ -37,7 +60,9 @@ export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
           <X size={20} />
         </button>
-        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">New Budget</h2>
+        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
+          {budgetToEdit ? 'Edit Budget' : 'New Budget'}
+        </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -77,7 +102,9 @@ export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="pt-2">
-            <Button className="w-full" type="submit">Set Budget</Button>
+            <Button className="w-full" type="submit">
+              {budgetToEdit ? 'Save Changes' : 'Set Budget'}
+            </Button>
           </div>
         </form>
       </Card>

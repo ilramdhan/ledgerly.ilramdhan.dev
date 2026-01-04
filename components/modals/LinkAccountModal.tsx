@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useData } from '../../contexts/DataContext';
-import { AccountType } from '../../types';
+import { AccountType, Account } from '../../types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  accountToEdit?: Account | null;
 }
 
-export const LinkAccountModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const { addAccount } = useData();
+export const LinkAccountModal: React.FC<Props> = ({ isOpen, onClose, accountToEdit }) => {
+  const { addAccount, editAccount } = useData();
   const [formData, setFormData] = useState({
     name: '',
     type: 'bank' as AccountType,
@@ -20,19 +21,44 @@ export const LinkAccountModal: React.FC<Props> = ({ isOpen, onClose }) => {
     institution: ''
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (accountToEdit) {
+        setFormData({
+          name: accountToEdit.name,
+          type: accountToEdit.type,
+          balance: accountToEdit.balance.toString(),
+          currency: accountToEdit.currency,
+          institution: accountToEdit.institution || ''
+        });
+      } else {
+        setFormData({ name: '', type: 'bank', balance: '', currency: 'USD', institution: '' });
+      }
+    }
+  }, [isOpen, accountToEdit]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    addAccount({
-      name: formData.name,
-      type: formData.type,
-      balance: parseFloat(formData.balance) || 0,
-      currency: formData.currency,
-      institution: formData.institution || undefined
-    });
+    if (accountToEdit) {
+      editAccount(accountToEdit.id, {
+        name: formData.name,
+        type: formData.type,
+        balance: parseFloat(formData.balance) || 0,
+        currency: formData.currency,
+        institution: formData.institution || undefined
+      });
+    } else {
+      addAccount({
+        name: formData.name,
+        type: formData.type,
+        balance: parseFloat(formData.balance) || 0,
+        currency: formData.currency,
+        institution: formData.institution || undefined
+      });
+    }
     onClose();
-    setFormData({ name: '', type: 'bank', balance: '', currency: 'USD', institution: '' });
   };
 
   return (
@@ -41,7 +67,9 @@ export const LinkAccountModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
           <X size={20} />
         </button>
-        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">Link Account</h2>
+        <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-white">
+          {accountToEdit ? 'Edit Account' : 'Link Account'}
+        </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -95,7 +123,9 @@ export const LinkAccountModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="pt-2">
-            <Button className="w-full" type="submit">Create Account</Button>
+            <Button className="w-full" type="submit">
+              {accountToEdit ? 'Save Changes' : 'Create Account'}
+            </Button>
           </div>
         </form>
       </Card>

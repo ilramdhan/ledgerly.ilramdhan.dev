@@ -4,14 +4,18 @@ import { Button } from '../components/ui/Button';
 import { SpendingChart } from '../components/charts/SpendingChart';
 import { TransactionList } from '../components/data/TransactionList';
 import { formatCurrency, cn, getChartData } from '../utils';
-import { TrendingUp, TrendingDown, Wallet, ArrowRight, ScanLine, Plus, Trash2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, ArrowRight, ScanLine, Plus, Trash2, Pencil } from 'lucide-react';
 import { StubOCR } from '../components/StubOCR';
 import { useData } from '../contexts/DataContext';
 import { AddTransactionModal } from '../components/modals/AddTransactionModal';
 import { LinkAccountModal } from '../components/modals/LinkAccountModal';
-import { Transaction } from '../types';
+import { Transaction, Account, PageRoute } from '../types';
 
-export const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onNavigate: (route: PageRoute) => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const { metrics, transactions, accounts, user, deleteAccount } = useData();
   const [showOCR, setShowOCR] = useState(false);
   const [showAddTxn, setShowAddTxn] = useState(false);
@@ -19,6 +23,7 @@ export const Dashboard: React.FC = () => {
   const [chartRange, setChartRange] = useState(7);
   const [ocrData, setOcrData] = useState<any>(null);
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
+  const [accountToEdit, setAccountToEdit] = useState<Account | null>(null);
 
   // Dynamic Chart Data based on selection
   const chartData = useMemo(() => {
@@ -41,6 +46,16 @@ export const Dashboard: React.FC = () => {
     setShowAddTxn(false);
     setOcrData(null);
     setTransactionToEdit(null);
+  }
+
+  const handleEditAccount = (acc: Account) => {
+    setAccountToEdit(acc);
+    setShowLinkAccount(true);
+  }
+
+  const handleCloseLinkAccount = () => {
+    setShowLinkAccount(false);
+    setAccountToEdit(null);
   }
 
   return (
@@ -111,6 +126,9 @@ export const Dashboard: React.FC = () => {
           <Card padding="none">
             <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
               <h3 className="font-semibold text-slate-900 dark:text-white">Recent Transactions</h3>
+              <Button variant="ghost" size="sm" onClick={() => onNavigate('transactions')}>
+                View All <ArrowRight size={16} className="ml-1" />
+              </Button>
             </div>
             <TransactionList transactions={transactions} limit={5} onEdit={handleEditTxn} />
           </Card>
@@ -139,16 +157,27 @@ export const Dashboard: React.FC = () => {
                     </span>
                   </div>
                   
-                  {/* Delete Account Button */}
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if(confirm(`Remove account ${account.name}?`)) deleteAccount(account.id);
-                    }}
-                    className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-white dark:bg-slate-900 rounded-md shadow-sm"
-                  >
-                    <Trash2 size={12} />
-                  </button>
+                  {/* Actions (Visible on Hover) */}
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                     <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditAccount(account);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-primary-500 bg-white dark:bg-slate-900 rounded-md shadow-sm"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if(confirm(`Remove account ${account.name}?`)) deleteAccount(account.id);
+                      }}
+                      className="p-1.5 text-slate-400 hover:text-red-500 bg-white dark:bg-slate-900 rounded-md shadow-sm"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -174,7 +203,11 @@ export const Dashboard: React.FC = () => {
         initialData={ocrData}
         transactionToEdit={transactionToEdit}
       />
-      <LinkAccountModal isOpen={showLinkAccount} onClose={() => setShowLinkAccount(false)} />
+      <LinkAccountModal 
+        isOpen={showLinkAccount} 
+        onClose={handleCloseLinkAccount} 
+        accountToEdit={accountToEdit}
+      />
     </div>
   );
 };
