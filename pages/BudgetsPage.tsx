@@ -3,14 +3,17 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useData } from '../contexts/DataContext';
 import { formatCurrency, cn } from '../utils';
-import { PieChart, Plus, Trash2, Pencil, Calendar } from 'lucide-react';
+import { PieChart, Plus, Trash2, Pencil, Calendar, ArrowRight } from 'lucide-react';
 import { CreateBudgetModal } from '../components/modals/CreateBudgetModal';
+import { BudgetDetailsModal } from '../components/modals/BudgetDetailsModal';
 import { Budget } from '../types';
 
 export const BudgetsPage: React.FC = () => {
   const { budgets, transactions, deleteBudget } = useData();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
 
   // Get current date details
   const now = new Date();
@@ -36,12 +39,25 @@ export const BudgetsPage: React.FC = () => {
     return { ...b, spent };
   });
 
-  const handleEdit = (budget: Budget) => {
+  const handleEdit = (e: React.MouseEvent, budget: Budget) => {
+    e.stopPropagation();
     setBudgetToEdit(budget);
     setShowCreateModal(true);
   };
 
-  const handleClose = () => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if(confirm('Are you sure you want to delete this budget?')) {
+        deleteBudget(id);
+    }
+  }
+
+  const handleCardClick = (budget: Budget) => {
+      setSelectedBudget(budget);
+      setShowDetailsModal(true);
+  }
+
+  const handleCloseCreate = () => {
     setShowCreateModal(false);
     setBudgetToEdit(null);
   };
@@ -77,35 +93,45 @@ export const BudgetsPage: React.FC = () => {
             const isOver = budget.spent > budget.limit;
 
             return (
-              <Card key={budget.id} className="space-y-4 group relative">
-                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+              <Card 
+                key={budget.id} 
+                className="space-y-4 group relative cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-transparent hover:border-l-primary-500"
+              >
+                {/* Clickable Area Overlay */}
+                <div className="absolute inset-0 z-0" onClick={() => handleCardClick(budget)}></div>
+
+                {/* Actions: Absolute but container has right padding to avoid overlap if needed. Visible on Mobile. */}
+                <div className="absolute top-4 right-4 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all z-10">
                   <button 
-                    onClick={() => handleEdit(budget)}
-                    className="p-1.5 text-slate-300 hover:text-primary-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    onClick={(e) => handleEdit(e, budget)}
+                    className="p-1.5 text-slate-400 hover:text-primary-500 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 hover:border-primary-200"
                     title="Edit Budget"
                   >
                     <Pencil size={14} />
                   </button>
                   <button 
-                    onClick={() => deleteBudget(budget.id)}
-                    className="p-1.5 text-slate-300 hover:text-red-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    onClick={(e) => handleDelete(e, budget.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-500 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700 hover:border-red-200"
                     title="Delete Budget"
                   >
                     <Trash2 size={14} />
                   </button>
                 </div>
 
-                <div className="flex justify-between items-start">
+                <div className="flex justify-between items-start pointer-events-none pr-16 md:pr-0">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                       <PieChart size={20} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 dark:text-white">{budget.category}</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          {budget.category}
+                          <ArrowRight size={12} className="opacity-0 group-hover:opacity-50 transition-opacity" />
+                      </h3>
                       <p className="text-xs text-slate-500 uppercase tracking-wide">{budget.period}</p>
                     </div>
                   </div>
-                  <div className="text-right mr-10 md:mr-10">
+                  <div className="text-right">
                     <span className={cn(
                       "font-bold block tabular-nums",
                       isOver ? "text-red-500" : "text-slate-900 dark:text-white"
@@ -117,7 +143,7 @@ export const BudgetsPage: React.FC = () => {
                 </div>
 
                 {/* Progress Bar */}
-                <div className="space-y-2">
+                <div className="space-y-2 pointer-events-none">
                   <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div 
                       className={cn("h-full rounded-full transition-all duration-1000", isOver ? "bg-red-500" : "bg-primary-500")} 
@@ -141,8 +167,14 @@ export const BudgetsPage: React.FC = () => {
       
       <CreateBudgetModal 
         isOpen={showCreateModal} 
-        onClose={handleClose} 
+        onClose={handleCloseCreate} 
         budgetToEdit={budgetToEdit}
+      />
+
+      <BudgetDetailsModal 
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        budget={selectedBudget}
       />
     </div>
   );

@@ -11,7 +11,7 @@ interface TransactionListProps {
 }
 
 const CategoryIcon = ({ category }: { category: string }) => {
-  const styles = "w-10 h-10 rounded-full flex items-center justify-center text-slate-500 bg-slate-100 dark:bg-slate-700 dark:text-slate-400";
+  const styles = "w-10 h-10 rounded-full flex items-center justify-center text-slate-500 bg-slate-100 dark:bg-slate-700 dark:text-slate-400 flex-shrink-0";
   
   switch(category.toLowerCase()) {
     case 'food & dining': return <div className={cn(styles, "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400")}><Coffee size={18} /></div>;
@@ -39,54 +39,58 @@ export const TransactionList: React.FC<TransactionListProps> = ({ transactions, 
             )}
             style={{ animationDelay: `${idx * 50}ms` }}
           >
-            <div className="flex items-center gap-4">
+            {/* Left Side: Icon & Info */}
+            <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
               <CategoryIcon category={txn.category} />
-              <div>
-                <h4 className="font-medium text-slate-900 dark:text-slate-100 text-sm md:text-base">{txn.merchant}</h4>
+              <div className="min-w-0">
+                <h4 className="font-medium text-slate-900 dark:text-slate-100 text-sm md:text-base truncate">{txn.merchant}</h4>
                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   <span>{formatDate(txn.date)}</span>
                   <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-                  <span>{txn.category}</span>
+                  <span className="truncate">{txn.category}</span>
                 </div>
               </div>
             </div>
 
-            <div className="text-right pr-16 md:pr-14">
-              <span className={cn(
-                "block font-medium tabular-nums text-sm md:text-base",
-                txn.amount > 0 ? "text-green-600 dark:text-green-400" : "text-slate-900 dark:text-slate-100"
-              )}>
-                {txn.amount > 0 ? '+' : ''}{formatCurrency(txn.amount, txn.currency)}
-              </span>
-              <span className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wide">
-                {txn.status}
-              </span>
-            </div>
+            {/* Right Side: Amount & Actions */}
+            <div className="flex items-center gap-3 pl-2 flex-shrink-0">
+              <div className="text-right">
+                <span className={cn(
+                  "block font-medium tabular-nums text-sm md:text-base",
+                  txn.amount > 0 ? "text-green-600 dark:text-green-400" : "text-slate-900 dark:text-slate-100"
+                )}>
+                  {txn.amount > 0 ? '+' : ''}{formatCurrency(txn.amount, txn.currency)}
+                </span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wide hidden sm:block">
+                  {txn.status}
+                </span>
+              </div>
 
-            {/* Actions (Visible on Hover) */}
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg p-1 shadow-sm border border-slate-100 dark:border-slate-700">
-              {onEdit && (
+              {/* Actions - No longer absolute. Always visible on mobile, hover on desktop */}
+              <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                {onEdit && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(txn);
+                    }}
+                    className="p-2 md:p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-all"
+                    title="Edit"
+                  >
+                    <Pencil size={16} className="md:w-3.5 md:h-3.5" />
+                  </button>
+                )}
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    onEdit(txn);
+                    if(confirm('Delete this transaction?')) deleteTransaction(txn.id);
                   }}
-                  className="p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-all"
-                  title="Edit"
+                  className="p-2 md:p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all"
+                  title="Delete"
                 >
-                  <Pencil size={14} />
+                  <Trash2 size={16} className="md:w-3.5 md:h-3.5" />
                 </button>
-              )}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if(confirm('Delete this transaction?')) deleteTransaction(txn.id);
-                }}
-                className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all"
-                title="Delete"
-              >
-                <Trash2 size={14} />
-              </button>
+              </div>
             </div>
           </div>
         ))}

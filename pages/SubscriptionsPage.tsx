@@ -32,11 +32,6 @@ export const SubscriptionsPage: React.FC = () => {
     const date = new Date(dateStr);
     const today = new Date();
     
-    // Simple logic: Project forward until date is in future
-    // In a real app, this is more complex. Here we just show the next cycle.
-    // If the original date is in the past, just add 1 cycle relative to original date to keep it simple,
-    // OR ideally project it to the next upcoming date relative to TODAY.
-    
     let nextDate = new Date(date);
     while (nextDate <= today) {
         if (period === 'yearly') {
@@ -92,46 +87,49 @@ export const SubscriptionsPage: React.FC = () => {
               {subscriptions.map((sub) => {
                   const period = sub.recurringPeriod || 'monthly';
                   return (
-                    <div key={sub.id} className="group relative flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm border border-slate-100 dark:border-slate-600">
-                        {getIcon(sub.merchant, sub.category)}
+                    <div key={sub.id} className="group flex items-center justify-between p-3 border border-slate-100 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
+                        <div className="flex items-center gap-3 md:gap-4 overflow-hidden">
+                            <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm border border-slate-100 dark:border-slate-600 flex-shrink-0">
+                            {getIcon(sub.merchant, sub.category)}
+                            </div>
+                            <div className="min-w-0">
+                                <h4 className="font-medium text-slate-900 dark:text-white truncate">{sub.merchant}</h4>
+                                <div className="text-xs text-slate-500 flex items-center gap-1 capitalize">
+                                    <span className={period === 'yearly' ? 'text-primary-600 font-medium' : ''}>{period}</span>
+                                    <span className="hidden sm:inline">•</span>
+                                    <span className="hidden sm:inline">Last: {formatDate(sub.date)}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                        <h4 className="font-medium text-slate-900 dark:text-white">{sub.merchant}</h4>
-                        <div className="text-xs text-slate-500 flex items-center gap-1 capitalize">
-                            <span className={period === 'yearly' ? 'text-primary-600 font-medium' : ''}>{period}</span>
-                            <span>•</span>
-                            <span>Last: {formatDate(sub.date)}</span>
+
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                            <div className="text-right">
+                                <span className="block font-bold text-slate-900 dark:text-white tabular-nums">
+                                {formatCurrency(Math.abs(sub.amount))}
+                                </span>
+                                <div className="text-xs text-slate-400">Next: {formatDate(getNextPaymentDate(sub.date, period)).split(',')[0]}</div>
+                            </div>
+                            
+                            {/* Actions - Flex layout, visible on mobile */}
+                            <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                <button 
+                                onClick={() => handleEdit(sub)}
+                                className="p-2 md:p-1.5 text-slate-400 hover:text-primary-500 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
+                                title="Edit"
+                                >
+                                <Pencil size={16} className="md:w-3.5 md:h-3.5" />
+                                </button>
+                                <button 
+                                onClick={() => {
+                                    if(confirm('Stop tracking this subscription? This will delete the transaction record.')) deleteTransaction(sub.id);
+                                }}
+                                className="p-2 md:p-1.5 text-slate-400 hover:text-red-500 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700"
+                                title="Delete"
+                                >
+                                <Trash2 size={16} className="md:w-3.5 md:h-3.5" />
+                                </button>
+                            </div>
                         </div>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <span className="block font-bold text-slate-900 dark:text-white tabular-nums">
-                        {formatCurrency(Math.abs(sub.amount))}
-                        </span>
-                        <div className="text-xs text-slate-400">Next: {formatDate(getNextPaymentDate(sub.date, period))}</div>
-                    </div>
-                    
-                    {/* Actions */}
-                    <div className="absolute top-1/2 -translate-y-1/2 right-3 flex gap-2 opacity-0 group-hover:opacity-100 bg-white dark:bg-slate-800 p-1 rounded-md shadow-md border border-slate-200 dark:border-slate-600 transition-all">
-                        <button 
-                        onClick={() => handleEdit(sub)}
-                        className="p-1.5 text-slate-400 hover:text-primary-500 rounded-md"
-                        title="Edit"
-                        >
-                        <Pencil size={14} />
-                        </button>
-                        <button 
-                        onClick={() => {
-                            if(confirm('Stop tracking this subscription? This will delete the transaction record.')) deleteTransaction(sub.id);
-                        }}
-                        className="p-1.5 text-slate-400 hover:text-red-500 rounded-md"
-                        title="Delete"
-                        >
-                        <Trash2 size={14} />
-                        </button>
-                    </div>
                     </div>
                   );
               })}

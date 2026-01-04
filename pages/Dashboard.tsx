@@ -144,7 +144,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scroll pr-1">
               {accounts.map(account => (
                 <div key={account.id} className="group p-3 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-800 transition-colors bg-slate-50/50 dark:bg-slate-800/50 relative">
-                  <div className="flex justify-between mb-1">
+                  <div className="flex justify-between mb-1 pr-14 md:pr-0">
                     <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{account.name}</span>
                     <span className={cn("text-xs", account.lastSynced.includes('d') ? "text-red-400" : "text-green-500")}>
                       {account.lastSynced}
@@ -157,14 +157,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     </span>
                   </div>
                   
-                  {/* Actions (Visible on Hover) */}
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  {/* Actions (Visible on Hover on Desktop, Always on Mobile) */}
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
                      <button 
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditAccount(account);
                       }}
-                      className="p-1.5 text-slate-400 hover:text-primary-500 bg-white dark:bg-slate-900 rounded-md shadow-sm"
+                      className="p-1.5 text-slate-400 hover:text-primary-500 bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-100 dark:border-slate-700"
                     >
                       <Pencil size={12} />
                     </button>
@@ -173,7 +173,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                         e.stopPropagation();
                         if(confirm(`Remove account ${account.name}?`)) deleteAccount(account.id);
                       }}
-                      className="p-1.5 text-slate-400 hover:text-red-500 bg-white dark:bg-slate-900 rounded-md shadow-sm"
+                      className="p-1.5 text-slate-400 hover:text-red-500 bg-white dark:bg-slate-900 rounded-md shadow-sm border border-slate-100 dark:border-slate-700"
                     >
                       <Trash2 size={12} />
                     </button>

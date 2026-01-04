@@ -51,32 +51,33 @@ export const GoalsPage: React.FC = () => {
 
             return (
               <Card key={goal.id} className="relative group flex flex-col h-full" padding="lg">
-                <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                {/* Actions: Always visible on mobile, hover on desktop. */}
+                <div className="absolute top-4 right-4 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all z-10">
                   <button 
                     onClick={() => handleEdit(goal)}
-                    className="p-1.5 text-slate-300 hover:text-primary-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    className="p-1.5 text-slate-400 hover:text-primary-500 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700"
                     title="Edit Goal"
                   >
                     <Pencil size={14} />
                   </button>
                   <button 
                     onClick={() => deleteGoal(goal.id)}
-                    className="p-1.5 text-slate-300 hover:text-red-500 bg-white dark:bg-slate-800 rounded-md shadow-sm"
+                    className="p-1.5 text-slate-400 hover:text-red-500 bg-white dark:bg-slate-800 rounded-md shadow-sm border border-slate-200 dark:border-slate-700"
                     title="Delete Goal"
                   >
                     <Trash2 size={14} />
                   </button>
                 </div>
 
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-4 mb-6 pr-12">
                   <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg flex-shrink-0"
                     style={{ backgroundColor: goal.color }}
                   >
                     <Trophy size={24} />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">{goal.name}</h3>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight truncate">{goal.name}</h3>
                     {goal.deadline && (
                       <div className="flex items-center text-xs text-slate-500 mt-1">
                         <Calendar size={12} className="mr-1" />
