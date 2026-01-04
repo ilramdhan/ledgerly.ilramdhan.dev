@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Account, Budget, Transaction, User, Metric, Goal } from '../types';
-import { ACCOUNTS as SEED_ACCOUNTS, TRANSACTIONS as SEED_TRANSACTIONS, BUDGETS as SEED_BUDGETS, CURRENT_USER } from '../constants';
+import { ACCOUNTS as SEED_ACCOUNTS, TRANSACTIONS as SEED_TRANSACTIONS, BUDGETS as SEED_BUDGETS, CATEGORIES as SEED_CATEGORIES, CURRENT_USER } from '../constants';
 
 interface ToastData {
   message: string;
@@ -13,6 +13,7 @@ interface DataContextType {
   transactions: Transaction[];
   budgets: Budget[];
   goals: Goal[];
+  categories: string[];
   metrics: Metric[];
   toast: ToastData | null;
   addTransaction: (txn: Omit<Transaction, 'id' | 'status'>) => void;
@@ -25,6 +26,8 @@ interface DataContextType {
   addGoal: (goal: Omit<Goal, 'id' | 'currentAmount'>) => void;
   editGoal: (id: string, updates: Partial<Goal>) => void;
   updateGoal: (id: string, currentAmount: number) => void;
+  addCategory: (name: string) => void;
+  deleteCategory: (name: string) => void;
   deleteTransaction: (id: string) => void;
   deleteBudget: (id: string) => void;
   deleteGoal: (id: string) => void;
@@ -64,6 +67,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       { id: 'g2', name: 'New Laptop', targetAmount: 2000, currentAmount: 1200, color: '#5B86E5', deadline: '2023-11-30' }
     ];
   });
+
+  const [categories, setCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem('ledgerly_categories');
+    return saved ? JSON.parse(saved) : SEED_CATEGORIES;
+  });
   
   // Computed States
   const [metrics, setMetrics] = useState<Metric[]>([]);
@@ -75,6 +83,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => localStorage.setItem('ledgerly_transactions', JSON.stringify(transactions)), [transactions]);
   useEffect(() => localStorage.setItem('ledgerly_budgets', JSON.stringify(budgets)), [budgets]);
   useEffect(() => localStorage.setItem('ledgerly_goals', JSON.stringify(goals)), [goals]);
+  useEffect(() => localStorage.setItem('ledgerly_categories', JSON.stringify(categories)), [categories]);
 
   // Recalculate metrics
   useEffect(() => {
@@ -252,6 +261,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     showToast('Goal deleted', 'success');
   };
 
+  const addCategory = (name: string) => {
+    if (!categories.includes(name)) {
+      setCategories(prev => [...prev, name]);
+      showToast('Category added', 'success');
+    }
+  };
+
+  const deleteCategory = (name: string) => {
+    setCategories(prev => prev.filter(c => c !== name));
+    showToast('Category removed', 'success');
+  };
+
   const updateUser = (updates: Partial<User>) => {
     setUser(prev => ({ ...prev, ...updates }));
     showToast('Profile updated', 'success');
@@ -271,6 +292,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       transactions,
       budgets,
       goals,
+      categories,
       metrics,
       toast,
       addTransaction,
@@ -283,6 +305,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       addGoal,
       editGoal,
       updateGoal,
+      addCategory,
+      deleteCategory,
       deleteTransaction,
       deleteBudget,
       deleteGoal,

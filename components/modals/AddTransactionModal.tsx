@@ -3,7 +3,6 @@ import { X } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useData } from '../../contexts/DataContext';
-import { CATEGORIES } from '../../constants';
 import { AccountType, TransactionType, Transaction } from '../../types';
 
 interface Props {
@@ -14,54 +13,54 @@ interface Props {
 }
 
 export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialData, transactionToEdit }) => {
-  const { accounts, addTransaction, editTransaction } = useData();
+  const { accounts, categories, addTransaction, editTransaction } = useData();
   const [formData, setFormData] = useState({
     amount: '',
     merchant: '',
-    category: CATEGORIES[0],
+    category: '',
     accountId: '',
     date: new Date().toISOString().split('T')[0],
     type: 'expense' as TransactionType
   });
 
-  // Load accounts first to set default
+  // Load defaults
   useEffect(() => {
-    if (accounts.length > 0 && !formData.accountId) {
-      setFormData(prev => ({ ...prev, accountId: accounts[0].id }));
-    }
-  }, [accounts]);
+    if (isOpen) {
+        // Ensure we have a default category/account if not set
+        const defaultCat = categories[0] || 'Uncategorized';
+        const defaultAcc = accounts[0]?.id || '';
 
-  // Handle Initial Data (OCR) or Edit Data
-  useEffect(() => {
-    if (transactionToEdit) {
-      setFormData({
-        amount: Math.abs(transactionToEdit.amount).toString(),
-        merchant: transactionToEdit.merchant,
-        category: transactionToEdit.category,
-        accountId: transactionToEdit.accountId,
-        date: transactionToEdit.date,
-        type: transactionToEdit.type
-      });
-    } else if (initialData) {
-      setFormData(prev => ({
-        ...prev,
-        merchant: initialData.merchant || '',
-        amount: initialData.amount ? Math.abs(initialData.amount).toString() : '',
-        date: initialData.date || prev.date,
-        type: (initialData.amount && initialData.amount > 0) ? 'income' : 'expense'
-      }));
-    } else {
-      // Reset if opened fresh
-      setFormData({
-        amount: '',
-        merchant: '',
-        category: CATEGORIES[0],
-        accountId: accounts[0]?.id || '',
-        date: new Date().toISOString().split('T')[0],
-        type: 'expense'
-      });
+        if (transactionToEdit) {
+            setFormData({
+                amount: Math.abs(transactionToEdit.amount).toString(),
+                merchant: transactionToEdit.merchant,
+                category: transactionToEdit.category,
+                accountId: transactionToEdit.accountId,
+                date: transactionToEdit.date,
+                type: transactionToEdit.type
+            });
+        } else if (initialData) {
+            setFormData(prev => ({
+                ...prev,
+                merchant: initialData.merchant || '',
+                amount: initialData.amount ? Math.abs(initialData.amount).toString() : '',
+                date: initialData.date || prev.date,
+                category: prev.category || defaultCat,
+                accountId: prev.accountId || defaultAcc,
+                type: (initialData.amount && initialData.amount > 0) ? 'income' : 'expense'
+            }));
+        } else {
+            setFormData({
+                amount: '',
+                merchant: '',
+                category: defaultCat,
+                accountId: defaultAcc,
+                date: new Date().toISOString().split('T')[0],
+                type: 'expense'
+            });
+        }
     }
-  }, [isOpen, initialData, transactionToEdit, accounts]);
+  }, [isOpen, initialData, transactionToEdit, accounts, categories]);
 
   if (!isOpen) return null;
 
@@ -98,7 +97,7 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
   const isEdit = !!transactionToEdit;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
       <Card className="w-full max-w-md relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
           <X size={20} />
@@ -158,7 +157,7 @@ export const AddTransactionModal: React.FC<Props> = ({ isOpen, onClose, initialD
                 value={formData.category}
                 onChange={e => setFormData({...formData, category: e.target.value})}
               >
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {categories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>

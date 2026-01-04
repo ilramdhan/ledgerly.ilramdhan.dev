@@ -3,7 +3,6 @@ import { X } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useData } from '../../contexts/DataContext';
-import { CATEGORIES } from '../../constants';
 import { Budget } from '../../types';
 
 interface Props {
@@ -13,9 +12,9 @@ interface Props {
 }
 
 export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose, budgetToEdit }) => {
-  const { addBudget, editBudget } = useData();
+  const { addBudget, editBudget, categories } = useData();
   const [formData, setFormData] = useState({
-    category: CATEGORIES[0],
+    category: '',
     limit: '',
     period: 'monthly' as 'monthly' | 'yearly'
   });
@@ -29,10 +28,10 @@ export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose, budgetToEd
           period: budgetToEdit.period
         });
       } else {
-        setFormData({ category: CATEGORIES[0], limit: '', period: 'monthly' });
+        setFormData({ category: categories[0] || '', limit: '', period: 'monthly' });
       }
     }
-  }, [isOpen, budgetToEdit]);
+  }, [isOpen, budgetToEdit, categories]);
 
   if (!isOpen) return null;
 
@@ -55,7 +54,7 @@ export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose, budgetToEd
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in">
       <Card className="w-full max-w-md relative">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
           <X size={20} />
@@ -72,7 +71,7 @@ export const CreateBudgetModal: React.FC<Props> = ({ isOpen, onClose, budgetToEd
               value={formData.category}
               onChange={e => setFormData({...formData, category: e.target.value})}
             >
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {categories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 

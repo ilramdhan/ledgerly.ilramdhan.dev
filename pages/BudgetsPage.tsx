@@ -3,7 +3,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useData } from '../contexts/DataContext';
 import { formatCurrency, cn } from '../utils';
-import { PieChart, Plus, Trash2, Pencil } from 'lucide-react';
+import { PieChart, Plus, Trash2, Pencil, Calendar } from 'lucide-react';
 import { CreateBudgetModal } from '../components/modals/CreateBudgetModal';
 import { Budget } from '../types';
 
@@ -12,11 +12,26 @@ export const BudgetsPage: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [budgetToEdit, setBudgetToEdit] = useState<Budget | null>(null);
 
-  // Calculate actual spend based on real transactions for each budget category
+  // Get current date details
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  // Calculate actual spend based on current period (Month or Year)
   const enrichedBudgets = budgets.map(b => {
-    // In a real app, filter by current month
     const spent = transactions
-      .filter(t => t.category === b.category && t.type === 'expense')
+      .filter(t => {
+        // 1. Must match category and be an expense
+        if (t.category !== b.category || t.type !== 'expense') return false;
+        
+        // 2. Must match the budget period
+        const tDate = new Date(t.date);
+        if (b.period === 'monthly') {
+          return tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
+        } else {
+          return tDate.getFullYear() === currentYear;
+        }
+      })
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
     return { ...b, spent };
   });
@@ -31,12 +46,17 @@ export const BudgetsPage: React.FC = () => {
     setBudgetToEdit(null);
   };
 
+  const currentMonthName = now.toLocaleString('default', { month: 'long' });
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Monthly Budgets</h1>
-          <p className="text-slate-500 dark:text-slate-400">Track your spending limits.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Budgets</h1>
+          <div className="flex items-center text-slate-500 dark:text-slate-400 mt-1">
+            <Calendar size={14} className="mr-1" />
+            <span className="text-sm">Period: {currentMonthName} {currentYear}</span>
+          </div>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
           <Plus size={16} className="mr-2" />
@@ -46,6 +66,7 @@ export const BudgetsPage: React.FC = () => {
 
       {enrichedBudgets.length === 0 ? (
         <div className="text-center py-20 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+           <PieChart size={48} className="mx-auto text-slate-300 mb-4" />
            <p className="text-slate-500">No budgets set yet. Create one to start tracking.</p>
            <Button variant="secondary" className="mt-4" onClick={() => setShowCreateModal(true)}>Create First Budget</Button>
         </div>
