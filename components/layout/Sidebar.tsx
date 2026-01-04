@@ -8,7 +8,8 @@ import {
   LogOut,
   Moon,
   Sun,
-  Target
+  Target,
+  CalendarClock
 } from 'lucide-react';
 import { cn } from '../../utils';
 import { PageRoute } from '../../types';
@@ -24,6 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, onNavigate, isDar
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transactions', icon: CreditCard },
+    { id: 'subscriptions', label: 'Subscriptions', icon: CalendarClock },
     { id: 'budgets', label: 'Budgets', icon: PieChart },
     { id: 'goals', label: 'Goals', icon: Target },
     { id: 'reports', label: 'Reports', icon: FileText },

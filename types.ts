@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -30,6 +31,7 @@ export interface Transaction {
   accountId: string;
   status: 'pending' | 'posted';
   type: TransactionType;
+  isRecurring?: boolean;
 }
 
 export interface Budget {
@@ -57,4 +59,4 @@ export interface Metric {
   history: number[]; // for sparkline
 }
 
-export type PageRoute = 'dashboard' | 'transactions' | 'budgets' | 'goals' | 'reports' | 'settings';
+export type PageRoute = 'dashboard' | 'transactions' | 'budgets' | 'goals' | 'reports' | 'settings' | 'subscriptions';

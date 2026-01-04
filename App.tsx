@@ -6,6 +6,7 @@ import { BudgetsPage } from './pages/BudgetsPage';
 import { GoalsPage } from './pages/GoalsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { PageRoute } from './types';
 import { Menu, X } from 'lucide-react';
 import { cn } from './utils';
@@ -48,6 +49,7 @@ const AppContent: React.FC = () => {
       case 'goals': return <GoalsPage />;
       case 'reports': return <ReportsPage />;
       case 'settings': return <SettingsPage />;
+      case 'subscriptions': return <SubscriptionsPage />;
       default: return (
         <div className="flex items-center justify-center h-full text-slate-400">
           <div className="text-center">
@@ -69,8 +71,8 @@ const AppContent: React.FC = () => {
         onToggleTheme={toggleTheme}
       />
 
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 w-full bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 z-40 px-4 h-16 flex items-center justify-between">
+      {/* Mobile Header - Lowered Z-Index to avoid blocking modals */}
+      <div className="md:hidden fixed top-0 w-full bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 z-30 px-4 h-16 flex items-center justify-between shadow-sm">
         <span className="font-bold text-lg text-primary-600">Ledgerly</span>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-slate-600 dark:text-slate-300">
           {isMobileMenuOpen ? <X /> : <Menu />}
@@ -79,8 +81,8 @@ const AppContent: React.FC = () => {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-white dark:bg-slate-800 z-30 pt-20 px-6 space-y-4 md:hidden animate-in slide-in-from-top-10 duration-200">
-          {['dashboard', 'transactions', 'budgets', 'goals', 'reports', 'settings'].map((route) => (
+        <div className="fixed inset-0 bg-white dark:bg-slate-800 z-20 pt-20 px-6 space-y-4 md:hidden animate-in slide-in-from-top-10 duration-200">
+          {['dashboard', 'transactions', 'subscriptions', 'budgets', 'goals', 'reports', 'settings'].map((route) => (
             <button
               key={route}
               onClick={() => {

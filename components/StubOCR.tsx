@@ -32,8 +32,8 @@ export const StubOCR: React.FC<Props> = ({ onScanComplete, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <Card className="w-full max-w-md relative overflow-hidden">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <Card className="w-full max-w-md relative overflow-hidden shadow-2xl">
         <button onClick={onClose} className="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
           <X size={20} />
         </button>
