@@ -1,0 +1,180 @@
+import React, { useState, useMemo } from 'react';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { SpendingChart } from '../components/charts/SpendingChart';
+import { TransactionList } from '../components/data/TransactionList';
+import { formatCurrency, cn, getChartData } from '../utils';
+import { TrendingUp, TrendingDown, Wallet, ArrowRight, ScanLine, Plus, Trash2 } from 'lucide-react';
+import { StubOCR } from '../components/StubOCR';
+import { useData } from '../contexts/DataContext';
+import { AddTransactionModal } from '../components/modals/AddTransactionModal';
+import { LinkAccountModal } from '../components/modals/LinkAccountModal';
+import { Transaction } from '../types';
+
+export const Dashboard: React.FC = () => {
+  const { metrics, transactions, accounts, user, deleteAccount } = useData();
+  const [showOCR, setShowOCR] = useState(false);
+  const [showAddTxn, setShowAddTxn] = useState(false);
+  const [showLinkAccount, setShowLinkAccount] = useState(false);
+  const [chartRange, setChartRange] = useState(7);
+  const [ocrData, setOcrData] = useState<any>(null);
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
+
+  // Dynamic Chart Data based on selection
+  const chartData = useMemo(() => {
+    return getChartData(transactions, chartRange);
+  }, [transactions, chartRange]);
+
+  // Handle OCR Result
+  const handleScanComplete = (data: any) => {
+    setOcrData(data);
+    setShowOCR(false);
+    setShowAddTxn(true); // Open modal with data
+  };
+
+  const handleEditTxn = (txn: Transaction) => {
+    setTransactionToEdit(txn);
+    setShowAddTxn(true);
+  }
+
+  const handleCloseAddTxn = () => {
+    setShowAddTxn(false);
+    setOcrData(null);
+    setTransactionToEdit(null);
+  }
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Good Morning, {user.name.split(' ')[0]}</h1>
+          <p className="text-slate-500 dark:text-slate-400">Here's your real-time financial overview.</p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => setShowOCR(true)}>
+            <ScanLine className="mr-2 h-4 w-4" />
+            Scan Receipt
+          </Button>
+          <Button onClick={() => setShowAddTxn(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Transaction
+          </Button>
+        </div>
+      </div>
+
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {metrics.map((metric, i) => (
+          <Card key={i} className="relative overflow-hidden">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{metric.label}</span>
+              <span className={cn(
+                "text-xs font-medium px-2 py-1 rounded-full flex items-center",
+                metric.trend === 'up' ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                metric.trend === 'down' ? "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
+                "bg-slate-50 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+              )}>
+                {metric.trend === 'up' ? <TrendingUp size={12} className="mr-1" /> : 
+                 metric.trend === 'down' ? <TrendingDown size={12} className="mr-1" /> : null}
+                {Math.abs(metric.change)}%
+              </span>
+            </div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
+              {formatCurrency(metric.value)}
+            </div>
+            <div className="h-1 mt-4 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-full bg-primary-500" style={{ width: '65%' }}></div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Chart Section */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Cash Flow</h3>
+              <select 
+                className="text-sm border-none bg-slate-50 dark:bg-slate-700 rounded-md px-3 py-1 text-slate-600 dark:text-slate-300 focus:ring-0 focus:outline-none cursor-pointer"
+                value={chartRange}
+                onChange={(e) => setChartRange(Number(e.target.value))}
+              >
+                <option value={7}>Last 7 Days</option>
+                <option value={30}>Last 30 Days</option>
+              </select>
+            </div>
+            <SpendingChart data={chartData} />
+          </Card>
+
+          <Card padding="none">
+            <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+              <h3 className="font-semibold text-slate-900 dark:text-white">Recent Transactions</h3>
+            </div>
+            <TransactionList transactions={transactions} limit={5} onEdit={handleEditTxn} />
+          </Card>
+        </div>
+
+        {/* Sidebar / Accounts Section */}
+        <div className="space-y-6">
+          <Card>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-slate-900 dark:text-white">My Accounts</h3>
+              <Button variant="ghost" size="icon"><Wallet size={18} /></Button>
+            </div>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scroll pr-1">
+              {accounts.map(account => (
+                <div key={account.id} className="group p-3 rounded-lg border border-slate-100 dark:border-slate-700 hover:border-primary-200 dark:hover:border-primary-800 transition-colors bg-slate-50/50 dark:bg-slate-800/50 relative">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{account.name}</span>
+                    <span className={cn("text-xs", account.lastSynced.includes('d') ? "text-red-400" : "text-green-500")}>
+                      {account.lastSynced}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <span className="text-xs text-slate-500 uppercase">{account.type}</span>
+                    <span className="font-semibold text-slate-900 dark:text-white tabular-nums">
+                      {formatCurrency(account.balance, account.currency)}
+                    </span>
+                  </div>
+                  
+                  {/* Delete Account Button */}
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if(confirm(`Remove account ${account.name}?`)) deleteAccount(account.id);
+                    }}
+                    className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-white dark:bg-slate-900 rounded-md shadow-sm"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <Button variant="secondary" className="w-full mt-4" onClick={() => setShowLinkAccount(true)}>
+              Link New Account
+            </Button>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-primary-600 to-primary-700 text-white border-none">
+            <h3 className="font-semibold mb-2">Pro Feature</h3>
+            <p className="text-primary-100 text-sm mb-4">Unlock AI insights and unlimited budgets with Ledgerly Pro.</p>
+            <Button className="w-full bg-white text-primary-600 hover:bg-primary-50 border-none shadow-none">
+              Upgrade Now
+            </Button>
+          </Card>
+        </div>
+      </div>
+      
+      {showOCR && <StubOCR onScanComplete={handleScanComplete} onClose={() => setShowOCR(false)} />}
+      <AddTransactionModal 
+        isOpen={showAddTxn} 
+        onClose={handleCloseAddTxn} 
+        initialData={ocrData}
+        transactionToEdit={transactionToEdit}
+      />
+      <LinkAccountModal isOpen={showLinkAccount} onClose={() => setShowLinkAccount(false)} />
+    </div>
+  );
+};

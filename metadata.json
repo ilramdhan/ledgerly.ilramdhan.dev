@@ -1,0 +1,7 @@
+{
+  "name": "Ledgerly",
+  "description": "A modern, soft, and comfortable financial tracking web application designed for data density and ease of use.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
