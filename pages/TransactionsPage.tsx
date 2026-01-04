@@ -2,11 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { TransactionList } from '../components/data/TransactionList';
-import { Search, Filter, Download, Plus, Calendar } from 'lucide-react';
+import { Search, Download, Plus } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { AddTransactionModal } from '../components/modals/AddTransactionModal';
-import { exportToCSV } from '../utils';
+import { exportToCSV, exportToPDF } from '../utils';
 import { Transaction } from '../types';
+import { DateRangePicker } from '../components/ui/DateRangePicker';
 
 export const TransactionsPage: React.FC = () => {
   const { transactions } = useData();
@@ -28,9 +29,13 @@ export const TransactionsPage: React.FC = () => {
     });
   }, [search, filterType, dateRange, transactions]);
 
-  const handleExport = () => {
+  const handleExportCSV = () => {
     exportToCSV(filteredData, `ledgerly_transactions_${new Date().toISOString().split('T')[0]}.csv`);
   };
+
+  const handleExportPDF = () => {
+    exportToPDF(filteredData, `Transaction Report - ${new Date().toLocaleDateString()}`);
+  }
 
   const handleEdit = (txn: Transaction) => {
     setTransactionToEdit(txn);
@@ -52,9 +57,12 @@ export const TransactionsPage: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" size="sm" onClick={handleExport}>
+          <Button variant="secondary" size="sm" onClick={handleExportPDF}>
+             PDF
+          </Button>
+          <Button variant="secondary" size="sm" onClick={handleExportCSV}>
             <Download size={16} className="mr-2" /> 
-            Export
+            CSV
           </Button>
           <Button size="sm" onClick={() => setShowAddModal(true)}>
             <Plus size={16} className="mr-2" />
@@ -77,22 +85,13 @@ export const TransactionsPage: React.FC = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-               <Calendar size={16} className="text-slate-400 ml-2" />
-               <input 
-                 type="date" 
-                 className="bg-transparent text-sm border-none focus:ring-0 text-slate-600 dark:text-slate-300 w-32"
-                 value={dateRange.from}
-                 onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
-               />
-               <span className="text-slate-400">-</span>
-               <input 
-                 type="date" 
-                 className="bg-transparent text-sm border-none focus:ring-0 text-slate-600 dark:text-slate-300 w-32"
-                 value={dateRange.to}
-                 onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
-               />
-            </div>
+            
+            {/* Custom Date Range Picker */}
+            <DateRangePicker 
+                from={dateRange.from}
+                to={dateRange.to}
+                onChange={setDateRange}
+            />
 
             <div className="flex gap-2 overflow-x-auto pb-1 sm:pb-0">
               {['all', 'expense', 'income', 'transfer'].map(type => (

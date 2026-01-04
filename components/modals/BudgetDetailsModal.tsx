@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { X, PieChart, AlertCircle, CheckCircle2 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { X, PieChart, AlertCircle, CheckCircle2, Search } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { useData } from '../../contexts/DataContext';
 import { Budget, Transaction } from '../../types';
@@ -14,6 +14,7 @@ interface Props {
 
 export const BudgetDetailsModal: React.FC<Props> = ({ isOpen, onClose, budget }) => {
   const { transactions } = useData();
+  const [search, setSearch] = useState('');
 
   const budgetTransactions = useMemo(() => {
     if (!budget) return [];
@@ -28,17 +29,37 @@ export const BudgetDetailsModal: React.FC<Props> = ({ isOpen, onClose, budget })
       
       // Must match the budget period
       const tDate = new Date(t.date);
+      let inPeriod = false;
       if (budget.period === 'monthly') {
-        return tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
+        inPeriod = tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
       } else {
-        return tDate.getFullYear() === currentYear;
+        inPeriod = tDate.getFullYear() === currentYear;
       }
+
+      if (!inPeriod) return false;
+
+      // Apply Search Filter
+      if (search) {
+        return t.merchant.toLowerCase().includes(search.toLowerCase()) || 
+               t.amount.toString().includes(search);
+      }
+      return true;
     }).sort((a, b) => b.date.localeCompare(a.date));
-  }, [budget, transactions]);
+  }, [budget, transactions, search]);
 
   if (!isOpen || !budget) return null;
 
-  const spent = budgetTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  // Calculate stats based on ALL transactions for this budget, not just filtered ones
+  // We need to re-calculate raw total to show correct progress bar even when searching
+  const allBudgetTransactions = transactions.filter(t => {
+     if (t.category !== budget.category || t.type !== 'expense') return false;
+     const tDate = new Date(t.date);
+     const now = new Date();
+     if (budget.period === 'monthly') return tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
+     return tDate.getFullYear() === now.getFullYear();
+  });
+
+  const spent = allBudgetTransactions.reduce((sum, t) => sum + Math.abs(t.amount), 0);
   const remaining = budget.limit - spent;
   const percent = Math.min((spent / budget.limit) * 100, 100);
   const isOver = spent > budget.limit;
@@ -128,13 +149,26 @@ export const BudgetDetailsModal: React.FC<Props> = ({ isOpen, onClose, budget })
 
                 {/* Transactions List */}
                 <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Contributing Transactions</h3>
-                    <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-semibold text-slate-900 dark:text-white">Contributing Transactions</h3>
+                        <div className="relative">
+                            <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <input 
+                                type="text" 
+                                placeholder="Search..." 
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="pl-8 pr-3 py-1 text-xs rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:outline-none focus:ring-1 focus:ring-primary-500 w-32 md:w-48"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden min-h-[150px]">
                         {budgetTransactions.length > 0 ? (
                             <TransactionList transactions={budgetTransactions} />
                         ) : (
-                            <div className="p-8 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/30">
-                                No expenses found for this category in the current period.
+                            <div className="p-8 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/30 h-full flex items-center justify-center">
+                                {search ? 'No matching transactions found.' : 'No expenses found for this category in the current period.'}
                             </div>
                         )}
                     </div>

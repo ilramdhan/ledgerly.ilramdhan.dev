@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useData } from '../contexts/DataContext';
-import { User, AlertTriangle, Check, Tag, Plus, X } from 'lucide-react';
+import { User, AlertTriangle, Check, Tag, Plus, X, Globe } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
   const { user, categories, updateUser, addCategory, deleteCategory, resetData } = useData();
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
+  const [currency, setCurrency] = useState(user.currency || 'USD');
   const [saved, setSaved] = useState(false);
   const [newCategory, setNewCategory] = useState('');
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    updateUser({ name, email });
+    updateUser({ name, email, currency });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -56,9 +57,29 @@ export const SettingsPage: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
+          
+          <div>
+             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
+                <Globe size={14}/> Primary Currency
+             </label>
+             <select 
+                className="w-full p-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+             >
+                <option value="USD">USD - US Dollar ($)</option>
+                <option value="IDR">IDR - Indonesian Rupiah (Rp)</option>
+                <option value="EUR">EUR - Euro (€)</option>
+                <option value="GBP">GBP - British Pound (£)</option>
+                <option value="JPY">JPY - Japanese Yen (¥)</option>
+                <option value="SGD">SGD - Singapore Dollar (S$)</option>
+             </select>
+             <p className="text-xs text-slate-500 mt-1">This changes the default currency symbol across the app.</p>
+          </div>
+
           <div className="pt-2 flex items-center gap-2">
             <Button type="submit">Save Changes</Button>
-            {saved && <span className="text-green-600 flex items-center text-sm"><Check size={16} className="mr-1"/> Saved</span>}
+            {saved && <span className="text-green-600 flex items-center text-sm animate-in fade-in"><Check size={16} className="mr-1"/> Saved</span>}
           </div>
         </form>
       </Card>

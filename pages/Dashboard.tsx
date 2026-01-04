@@ -9,6 +9,7 @@ import { StubOCR } from '../components/StubOCR';
 import { useData } from '../contexts/DataContext';
 import { AddTransactionModal } from '../components/modals/AddTransactionModal';
 import { LinkAccountModal } from '../components/modals/LinkAccountModal';
+import { CalendarWidget } from '../components/widgets/CalendarWidget';
 import { Transaction, Account, PageRoute } from '../types';
 
 interface DashboardProps {
@@ -78,31 +79,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {metrics.map((metric, i) => (
-          <Card key={i} className="relative overflow-hidden">
-            <div className="flex justify-between items-start mb-2">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{metric.label}</span>
-              <span className={cn(
-                "text-xs font-medium px-2 py-1 rounded-full flex items-center",
-                metric.trend === 'up' ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-                metric.trend === 'down' ? "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
-                "bg-slate-50 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
-              )}>
-                {metric.trend === 'up' ? <TrendingUp size={12} className="mr-1" /> : 
-                 metric.trend === 'down' ? <TrendingDown size={12} className="mr-1" /> : null}
-                {Math.abs(metric.change)}%
-              </span>
-            </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
-              {formatCurrency(metric.value)}
-            </div>
-            <div className="h-1 mt-4 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-              <div className="h-full bg-primary-500" style={{ width: '65%' }}></div>
-            </div>
-          </Card>
-        ))}
+      {/* Metrics Grid - Adjusted to include Calendar Widget */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {metrics.map((metric, i) => (
+            <Card key={i} className="relative overflow-hidden">
+                <div className="flex justify-between items-start mb-2">
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{metric.label}</span>
+                <span className={cn(
+                    "text-xs font-medium px-2 py-1 rounded-full flex items-center",
+                    metric.trend === 'up' ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                    metric.trend === 'down' ? "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
+                    "bg-slate-50 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                )}>
+                    {metric.trend === 'up' ? <TrendingUp size={12} className="mr-1" /> : 
+                    metric.trend === 'down' ? <TrendingDown size={12} className="mr-1" /> : null}
+                    {Math.abs(metric.change)}%
+                </span>
+                </div>
+                <div className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums">
+                {formatCurrency(metric.value)}
+                </div>
+                <div className="h-1 mt-4 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-primary-500" style={{ width: '65%' }}></div>
+                </div>
+            </Card>
+            ))}
+        </div>
+        <div className="md:col-span-1">
+            <CalendarWidget />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

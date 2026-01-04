@@ -8,14 +8,16 @@ import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { PageRoute } from './types';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Plus } from 'lucide-react';
 import { cn } from './utils';
 import { DataProvider, useData } from './contexts/DataContext';
 import { Toast } from './components/ui/Toast';
+import { AddTransactionModal } from './components/modals/AddTransactionModal';
 
 const AppContent: React.FC = () => {
   const [activeRoute, setActiveRoute] = useState<PageRoute>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showAddTxnMobile, setShowAddTxnMobile] = useState(false);
   
   // Theme State with persistence
   const [isDark, setIsDark] = useState(() => {
@@ -110,6 +112,14 @@ const AppContent: React.FC = () => {
         {renderContent()}
       </main>
 
+      {/* Mobile Floating Action Button (FAB) */}
+      <button 
+        onClick={() => setShowAddTxnMobile(true)}
+        className="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg shadow-primary-600/40 flex items-center justify-center z-40 active:scale-95 transition-transform"
+      >
+        <Plus size={28} />
+      </button>
+
       {/* Toast Notification */}
       {toast && (
         <Toast 
@@ -118,6 +128,12 @@ const AppContent: React.FC = () => {
           onClose={hideToast} 
         />
       )}
+
+      {/* Mobile Add Transaction Modal */}
+      <AddTransactionModal 
+        isOpen={showAddTxnMobile}
+        onClose={() => setShowAddTxnMobile(false)}
+      />
     </div>
   );
 };

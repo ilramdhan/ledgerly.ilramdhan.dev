@@ -1,11 +1,26 @@
 import { Transaction } from './types';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
-export const formatCurrency = (amount: number, currency = 'USD', locale = 'en-US'): string => {
+// Map currency codes to likely locales for better formatting
+const CURRENCY_LOCALES: Record<string, string> = {
+  'USD': 'en-US',
+  'EUR': 'de-DE',
+  'GBP': 'en-GB',
+  'IDR': 'id-ID',
+  'JPY': 'ja-JP',
+  'SGD': 'en-SG',
+  'AUD': 'en-AU',
+};
+
+export const formatCurrency = (amount: number, currency = 'USD'): string => {
+  const locale = CURRENCY_LOCALES[currency] || 'en-US';
+  
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: currency === 'IDR' ? 0 : 2, // IDR usually doesn't need decimals
+    maximumFractionDigits: currency === 'IDR' ? 0 : 2,
   }).format(amount);
 };
 
@@ -59,8 +74,38 @@ export const getChartData = (transactions: Transaction[], days = 7) => {
   return result;
 };
 
-// Kept for backward compatibility if needed, but getChartData is preferred
-export const getLast7DaysChartData = (transactions: Transaction[]) => getChartData(transactions, 7);
+export const getMonthlyTrendData = (transactions: Transaction[]) => {
+  const result = [];
+  const today = new Date();
+  
+  // Last 6 months
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    const monthKey = d.getMonth();
+    const yearKey = d.getFullYear();
+    const label = d.toLocaleDateString('en-US', { month: 'short' });
+
+    const monthTransactions = transactions.filter(t => {
+      const tDate = new Date(t.date);
+      return tDate.getMonth() === monthKey && tDate.getFullYear() === yearKey;
+    });
+
+    const income = monthTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const expense = monthTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+
+    result.push({
+      name: label,
+      income,
+      expense
+    });
+  }
+  return result;
+}
 
 export const exportToCSV = (transactions: Transaction[], filename = 'transactions.csv') => {
   const headers = ['Date', 'Merchant', 'Amount', 'Currency', 'Category', 'Account', 'Type', 'Status'];
@@ -91,4 +136,45 @@ export const exportToCSV = (transactions: Transaction[], filename = 'transaction
     link.click();
     document.body.removeChild(link);
   }
+};
+
+export const exportToPDF = (transactions: Transaction[], title = 'Transaction Report') => {
+  const doc = new jsPDF();
+
+  // Header
+  doc.setFontSize(18);
+  doc.text('Ledgerly', 14, 22);
+  doc.setFontSize(12);
+  doc.text(title, 14, 32);
+  doc.setFontSize(10);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 38);
+
+  // Table
+  const tableColumn = ["Date", "Merchant", "Category", "Type", "Amount"];
+  const tableRows: any[] = [];
+
+  transactions.forEach(t => {
+    const transactionData = [
+      formatDate(t.date),
+      t.merchant,
+      t.category,
+      t.type,
+      formatCurrency(t.amount, t.currency)
+    ];
+    tableRows.push(transactionData);
+  });
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 45,
+    theme: 'grid',
+    headStyles: { fillColor: [91, 134, 229] }, // Primary color
+    styles: { fontSize: 9 },
+    columnStyles: {
+      4: { halign: 'right' }
+    }
+  });
+
+  doc.save(`ledgerly_report_${new Date().toISOString().split('T')[0]}.pdf`);
 };
