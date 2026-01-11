@@ -1,110 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Primary Meta Tags -->
-    <title>Ledgerly - Smart Personal Finance Tracker</title>
-    <meta name="title" content="Ledgerly - Smart Personal Finance Tracker" />
-    <meta name="description" content="A modern personal finance dashboard to track expenses, manage budgets, set financial goals, and take control of your money with beautiful analytics." />
-    <meta name="keywords" content="finance, budget, expense tracker, money management, personal finance, savings goals, financial dashboard" />
-    <meta name="author" content="Ledgerly Team" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#5B86E5" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0F1724" media="(prefers-color-scheme: dark)" />
-    <meta name="color-scheme" content="light dark" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://ledgerly.app/" />
-    <meta property="og:title" content="Ledgerly - Smart Personal Finance Tracker" />
-    <meta property="og:description" content="A modern personal finance dashboard to track expenses, manage budgets, set financial goals, and take control of your money." />
-    <meta property="og:image" content="https://ledgerly.app/og-image.png" />
-    <meta property="og:site_name" content="Ledgerly" />
-    <meta property="og:locale" content="en_US" />
-    
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://ledgerly.app/" />
-    <meta name="twitter:title" content="Ledgerly - Smart Personal Finance Tracker" />
-    <meta name="twitter:description" content="A modern personal finance dashboard to track expenses, manage budgets, set financial goals, and take control of your money." />
-    <meta name="twitter:image" content="https://ledgerly.app/og-image.png" />
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Ledgerly" />
-    
-    <!-- Microsoft Tiles -->
-    <meta name="msapplication-TileColor" content="#5B86E5" />
-    <meta name="msapplication-config" content="/browserconfig.xml" />
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Primary Meta Tags -->
+  <title>Ledgerly - Smart Personal Finance Tracker</title>
+  <meta name="title" content="Ledgerly - Smart Personal Finance Tracker" />
+  <meta name="description"
+    content="A modern personal finance dashboard to track expenses, manage budgets, set financial goals, and take control of your money with beautiful analytics." />
+  <meta name="keywords"
+    content="finance, budget, expense tracker, money management, personal finance, savings goals, financial dashboard" />
+  <meta name="author" content="Ledgerly Team" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+  <link rel="alternate icon" href="/favicon.ico?v=2" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" />
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#5B86E5" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0F1724" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="light dark" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ledgerly.app/" />
+  <meta property="og:title" content="Ledgerly - Smart Personal Finance Tracker" />
+  <meta property="og:description"
+    content="A modern personal finance dashboard to track expenses, manage budgets, set financial goals, and take control of your money." />
+  <meta property="og:image" content="https://ledgerly.app/og-image.png" />
+  <meta property="og:site_name" content="Ledgerly" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://ledgerly.app/" />
+  <meta name="twitter:title" content="Ledgerly - Smart Personal Finance Tracker" />
+  <meta name="twitter:description"
+    content="A modern personal finance dashboard to track expenses, manage budgets, set financial goals, and take control of your money." />
+  <meta name="twitter:image" content="https://ledgerly.app/og-image.png" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Ledgerly" />
+
+  <!-- Microsoft Tiles -->
+  <meta name="msapplication-TileColor" content="#5B86E5" />
+  <meta name="msapplication-config" content="/browserconfig.xml" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#f0f5ff',
+              100: '#e0ebff',
+              500: '#5B86E5',
+              600: '#466DD1',
+              700: '#3a5bb0',
             },
-            colors: {
-              primary: {
-                50: '#f0f5ff',
-                100: '#e0ebff',
-                500: '#5B86E5',
-                600: '#466DD1',
-                700: '#3a5bb0',
-              },
-              slate: {
-                850: '#151e2e', // Custom dark bg
-              }
-            },
-            boxShadow: {
-              'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-              'glow': '0 0 15px rgba(91, 134, 229, 0.3)',
+            slate: {
+              850: '#151e2e', // Custom dark bg
             }
+          },
+          boxShadow: {
+            'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+            'glow': '0 0 15px rgba(91, 134, 229, 0.3)',
           }
         }
       }
-    </script>
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        -webkit-font-smoothing: antialiased;
-      }
-      .tabular-nums {
-        font-variant-numeric: tabular-nums;
-      }
-      /* Custom scrollbar for table containers */
-      .custom-scroll::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      .custom-scroll::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .custom-scroll::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 3px;
-      }
-      .dark .custom-scroll::-webkit-scrollbar-thumb {
-        background: #475569;
-      }
-    </style>
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Custom scrollbar for table containers */
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    .dark .custom-scroll::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -120,8 +130,10 @@
 }
 </script>
 </head>
-  <body class="bg-[#F7F9FB] dark:bg-[#0F1724] text-slate-900 dark:text-slate-100 transition-colors duration-200">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body class="bg-[#F7F9FB] dark:bg-[#0F1724] text-slate-900 dark:text-slate-100 transition-colors duration-200">
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
